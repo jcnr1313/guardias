@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Guardias de Técnicos</title>
+    <title>Gestor de Guardias de Técnicos - Valencia</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -18,7 +18,7 @@
             color: #333;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
         header {
@@ -82,20 +82,43 @@
         }
         .calendar-day {
             background: white;
-            min-height: 100px;
+            min-height: 110px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            padding: 5px;
+            padding: 6px;
             position: relative;
             font-size: 13px;
+            cursor: pointer;
+        }
+        .calendar-day:hover {
+            border-color: var(--accent-color);
         }
         .calendar-day.other-month {
             background: #f1f1f1;
             color: #aaa;
         }
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
         .day-number {
             font-weight: bold;
-            margin-bottom: 5px;
+        }
+        .festivo-icon {
+            font-size: 12px;
+            background: #e74c3c;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .festivo-local-icon {
+            font-size: 12px;
+            background: #e67e22;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
         }
         .guard-badge {
             font-size: 11px;
@@ -107,6 +130,13 @@
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+        }
+        .salary-badge {
+            font-size: 10px;
+            color: #555;
+            margin-top: 4px;
+            display: block;
+            font-weight: bold;
         }
         
         /* Listas y Formularios */
@@ -128,34 +158,41 @@
 
 <div class="container">
     <header>
-        <h1>Gestión de Guardias de Técnicos</h1>
+        <h1>Gestión de Guardias de Técnicos (Valencia)</h1>
         <div>
             <button class="btn btn-success" onclick="generarNuevoAno()">🔄 Rotar / Nuevo Año</button>
         </div>
     </header>
 
     <div class="controls-panel">
+        <!-- Panel de Tarifas -->
         <div class="card">
             <h3>Tarifas de Guardia</h3>
             <label>Precio Día Laboral (€):</label>
-            <input type="number" id="precioLaboral" value="28" onchange="actualizarTarifas()">
+            <input type="number" id="precioLaboral" value="24" onchange="actualizarTarifas()">
             
             <label>Precio Día Festivo (€):</label>
-            <input type="number" id="precioFestivo" value="70" onchange="actualizarTarifas()">
-            <p id="totalSemanaInfo" style="font-size: 13px; color: #666; margin-top: 5px;"></p>
+            <input type="number" id="precioFestivo" value="80" onchange="actualizarTarifas()">
+            
+            <div style="font-size: 12px; color: #555; margin-top: 10px;">
+                <span class="festivo-icon">🎈 N</span> Festivo Nacional / España<br>
+                <span class="festivo-local-icon">🏛️ L</span> Festivo Local (Valencia)
+            </div>
         </div>
 
+        <!-- Gestión de Técnicos -->
         <div class="card">
             <h3>Técnicos y Colores</h3>
             <ul id="listaTecnicos"></ul>
             <div style="display: flex; gap: 5px;">
                 <input type="text" id="nuevoNombreTecnico" placeholder="Nombre del técnico" style="margin-bottom:0;">
-                <input type="color" id="nuevoColorTecnico" value="#e74c3c" style="width: 50px; height: 38px; padding: 0; border: none; cursor: pointer;">
+                <input type="color" id="nuevoColorTecnico" value="#9b59b6" style="width: 50px; height: 38px; padding: 0; border: none; cursor: pointer;">
                 <button class="btn" onclick="agregarTecnico()">Añadir</button>
             </div>
         </div>
     </div>
 
+    <!-- Calendario Principal -->
     <div class="card">
         <div class="calendar-header">
             <button class="btn" onclick="cambiarMes(-1)">❮ Mes Anterior</button>
@@ -176,9 +213,8 @@
 </div>
 
 <script>
-    // Estado inicial de la aplicación
     let fechaActual = new Date();
-    let tarifas = { laboral: 28, festivo: 70 };
+    let tarifas = { laboral: 24, festivo: 80 };
     
     let tecnicos = [
         { id: 1, nombre: "Lucas", color: "#e84393" },
@@ -187,20 +223,28 @@
         { id: 4, nombre: "Óscar Idáñez", color: "#00b894" }
     ];
 
-    // Festivos fijos de ejemplo (Mes 0-11, Día)
-    let festivos = [
-        { mes: 0, dia: 1, nombre: "Año Nuevo" },
-        { mes: 4, dia: 1, nombre: "Día del Trabajo" },
-        { mes: 11, dia: 25, nombre: "Navidad" }
-    ];
+    // Festivos de España y Locales de Valencia (Formato "MM-DD" o específicos por año)
+    // tipo: 'nacional' o 'local'
+    const festivosFijos = {
+        "01-01": { nombre: "Año Nuevo", tipo: "nacional" },
+        "01-06": { nombre: "Epifanía del Señor", tipo: "nacional" },
+        "03-19": { nombre: "San José (Valencia)", tipo: "local" },
+        "05-01": { nombre: "Fiesta del Trabajo", tipo: "nacional" },
+        "06-24": { nombre: "San Juan (Valencia)", tipo: "local" },
+        "08-15": { nombre: "Asunción de la Virgen", tipo: "nacional" },
+        "10-09": { nombre: "Día de la Comunitat Valenciana", tipo: "local" },
+        "10-12": { nombre: "Fiesta Nacional de España", tipo: "nacional" },
+        "11-01": { nombre: "Todos los Santos", tipo: "nacional" },
+        "12-06": { nombre: "Día de la Constitución Española", tipo: "nacional" },
+        "12-08": { nombre: "Inmaculada Concepción", tipo: "nacional" },
+        "12-25": { nombre: "Natividad del Señor", tipo: "nacional" }
+    };
 
-    // Guardias asignadas por semana (Llave: "YYYY-MM-DD" del viernes de inicio, Valor: id_tecnico)
     let asignacionGuardias = {};
 
     function inicializarApp() {
         renderizarTecnicos();
         renderizarCalendario();
-        actualizarInfoTarifas();
     }
 
     function renderizarTecnicos() {
@@ -239,9 +283,8 @@
     }
 
     function obtenerViernesDeGuardia(fecha) {
-        // La guardia empieza en viernes. Buscamos el viernes de la semana actual o anterior.
         let f = new Date(fecha);
-        let diaSemana = f.getDay(); // 0: Dom, 5: Vie, etc.
+        let diaSemana = f.getDay(); // 0: Dom, 5: Vie
         let distancia = (diaSemana >= 5) ? (5 - diaSemana) : -(2 + (4 - diaSemana));
         f.setDate(f.getDate() + distancia);
         f.setHours(0,0,0,0);
@@ -253,14 +296,50 @@
         if (asignacionGuardias[clave]) {
             return tecnicos.find(t => t.id === asignacionGuardias[clave]);
         }
-        
-        // Algoritmo de rotación automática basada en número de semana del año
         if (tecnicos.length === 0) return null;
         let startOfYear = new Date(viernesDate.getFullYear(), 0, 1);
         let pastDays = Math.floor((viernesDate - startOfYear) / (24 * 60 * 60 * 1000));
         let semanaNum = Math.floor(pastDays / 7);
         let indiceTecnico = semanaNum % tecnicos.length;
         return tecnicos[indiceTecnico];
+    }
+
+    function esFestivo(fecha) {
+        let mesStr = String(fecha.getMonth() + 1).padStart(2, '0');
+        let diaStr = String(fecha.getDate()).padStart(2, '0');
+        let clave = `${mesStr}-${diaStr}`;
+        let diaSemana = fecha.getDay();
+        
+        // Sábado (6) y Domingo (0) son festivos por defecto
+        if (diaSemana === 0 || diaSemana === 6) {
+            return { esFestivo: true, tipo: 'finDeSemana', nombre: 'Fin de semana' };
+        }
+
+        if (festivosFijos[clave]) {
+            return { esFestivo: true, tipo: festivosFijos[clave].tipo, nombre: festivosFijos[clave].nombre };
+        }
+
+        return { esFestivo: false };
+    }
+
+    // Calcula el importe total de la semana de guardia (Viernes a Viernes: 7 días)
+    function calcularImporteSemana(viernesDate) {
+        let laboralCount = 0;
+        let festivoCount = 0;
+
+        let cursor = new Date(viernesDate);
+        for (let i = 0; i < 7; i++) {
+            let resFestivo = esFestivo(cursor);
+            if (resFestivo.esFestivo) {
+                festivoCount++;
+            } else {
+                laboralCount++;
+            }
+            cursor.setDate(cursor.getDate() + 1);
+        }
+
+        let total = (laboralCount * tarifas.laboral) + (festivoCount * tarifas.festivo);
+        return { total, laboralCount, festivoCount };
     }
 
     function renderizarCalendario() {
@@ -273,13 +352,12 @@
         const primerDiaMes = new Date(ano, mes, 1);
         const ultimoDiaMes = new Date(ano, mes + 1, 0);
         
-        let primerDiaIndice = primerDiaMes.getDay() - 1; // Lunes como primer día
+        let primerDiaIndice = primerDiaMes.getDay() - 1;
         if (primerDiaIndice === -1) primerDiaIndice = 6;
 
         const cuadricula = document.getElementById('cuadriculaDias');
         cuadricula.innerHTML = '';
 
-        // Días del mes anterior para completar la semana
         let prevMesUltimoDia = new Date(ano, mes, 0).getDate();
         for (let i = primerDiaIndice - 1; i >= 0; i--) {
             let diaNum = prevMesUltimoDia - i;
@@ -287,13 +365,11 @@
             cuadricula.appendChild(crearCeldaDia(diaNum, fechaCelda, true));
         }
 
-        // Días del mes actual
         for (let i = 1; i <= ultimoDiaMes.getDate(); i++) {
             let fechaCelda = new Date(ano, mes, i);
             cuadricula.appendChild(crearCeldaDia(i, fechaCelda, false));
         }
 
-        // Días del mes siguiente para completar la cuadrícula
         let totalCeldasActuales = primerDiaIndice + ultimoDiaMes.getDate();
         let totalCeldasGrid = Math.ceil(totalCeldasActuales / 7) * 7;
         let diasSiguientes = totalCeldasGrid - totalCeldasActuales;
@@ -307,32 +383,53 @@
         const div = document.createElement('div');
         div.className = `calendar-day ${esOtroMes ? 'other-month' : ''}`;
         
-        div.innerHTML = `<div class="day-number">${diaNum}</div>`;
+        let festivoInfo = esFestivo(fecha);
+        let indicadorFestivoHTML = '';
+        if (festivoInfo.esFestivo && festivoInfo.tipo !== 'finDeSemana') {
+            if (festivoInfo.tipo === 'nacional') {
+                indicadorFestivoHTML = `<span class="festivo-icon" title="${festivoInfo.nombre}">🎈 N</span>`;
+            } else if (festivoInfo.tipo === 'local') {
+                indicadorFestivoHTML = `<span class="festivo-local-icon" title="${festivoInfo.nombre} (Valencia)">🏛️ L</span>`;
+            }
+        }
 
-        // Calcular qué técnico está de guardia este día (según ciclo Viernes a Viernes)
+        div.innerHTML = `
+            <div class="day-header">
+                <span class="day-number">${diaNum}</span>
+                ${indicadorFestivoHTML}
+            </div>
+        `;
+
         let viernesAsociado = obtenerViernesDeGuardia(fecha);
         let tecnicoAsignado = obtenerTecnicoParaViernes(viernesAsociado);
 
         if (tecnicoAsignado) {
             div.innerHTML += `<span class="guard-badge" style="background-color: ${tecnicoAsignado.color};" title="Guardia (Viernes a Viernes)">👤 ${tecnicoAsignado.nombre}</span>`;
+            
+            // Si es viernes (inicio de semana), calculamos y mostramos el importe total de esa semana de guardia
+            if (fecha.getDay() === 5) {
+                let calculo = calcularImporteSemana(viernesAsociado);
+                div.innerHTML += `<span class="salary-badge">💰 ${calculo.total}€ (${calculo.festivoCount}f, ${calculo.laboralCount}l)</span>`;
+            }
         }
 
-        // Permitir modificar la guardia haciendo clic en el día
-        div.onclick = () => modificarGuardiaModal(viernesAsociado);
+        let viernesDateStr = viernesAsociado.toISOString().split('T')[0];
+        div.onclick = () => modificarGuardiaModal(viernesAsociado, viernesDateStr);
 
         return div;
     }
 
-    function modificarGuardiaModal(viernesDate) {
+    function modificarGuardiaModal(viernesDate, viernesDateStr) {
         let fechaStr = viernesDate.toLocaleDateString();
+        let calculo = calcularImporteSemana(viernesDate);
         let nombresOpciones = tecnicos.map(t => `${t.nombre} (ID: ${t.id})`).join('\n');
-        let respuesta = prompt(`Modificar guardia que inicia el Viernes ${fechaStr}.\nIntroduce el ID del nuevo técnico asignado:\n\n${nombresOpciones}`);
         
-        if (respuesta !== null) {
+        let respuesta = prompt(`Semana del Viernes ${fechaStr}\nTotal estimado: ${calculo.total}€ (${calculo.festivoCount} festivos, ${calculo.laboralCount} laborales).\n\nIntroduce el ID del nuevo técnico para reasignar (Baja/Cambio):`, "");
+        
+        if (respuesta !== null && respuesta.trim() !== "") {
             let idTecnico = parseInt(respuesta);
             if (tecnicos.some(t => t.id === idTecnico)) {
-                let clave = viernesDate.toISOString().split('T')[0];
-                asignacionGuardias[clave] = idTecnico;
+                asignacionGuardias[viernesDateStr] = idTecnico;
                 renderizarCalendario();
             } else {
                 alert("ID de técnico no válido.");
@@ -343,26 +440,19 @@
     function actualizarTarifas() {
         tarifas.laboral = parseFloat(document.getElementById('precioLaboral').value) || 0;
         tarifas.festivo = parseFloat(document.getElementById('precioFestivo').value) || 0;
-        actualizarInfoTarifas();
-    }
-
-    function actualizarInfoTarifas() {
-        let totalSemana = (tarifas.laboral * 5) + (tarifas.festivo * 2); // Ejemplo 5 laborales, 2 festivos
-        document.getElementById('totalSemanaInfo').innerText = `Estimación semana tipo (5 lab, 2 fes): ${totalSemana} €`;
+        renderizarCalendario();
     }
 
     function generarNuevoAno() {
-        if(confirm("¿Estás seguro de generar un nuevo ciclo anual cambiando el orden de rotación para evitar repetir festivos?")) {
-            // Rotamos el orden del array de técnicos para desplazar el inicio del año
+        if(confirm("¿Estás seguro de generar un nuevo ciclo anual cambiando el orden de rotación para los festivos?")) {
             let primerTecnico = tecnicos.shift();
             tecnicos.push(primerTecnico);
-            asignacionGuardias = {}; // Limpiamos modificaciones manuales para aplicar la nueva rotación
+            asignacionGuardias = {};
             renderizarCalendario();
             alert("¡Rotación anual aplicada con éxito!");
         }
     }
 
-    // Inicializar al cargar la página
     window.onload = inicializarApp;
 </script>
 
