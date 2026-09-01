@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Guardias de Técnicos</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { margin: 0; font-size: 24px; color: var(--primary-color); }
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card h3 { margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: #2980b9; }
+        .btn-success { background-color: #27ae60; }
+        .btn-success:hover { background-color: #219653; }
+        
+        /* Calendario mensual */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .day-name {
+            text-align: center;
+            font-weight: bold;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            position: relative;
+            font-size: 13px;
+        }
+        .calendar-day.other-month {
+            background: #f1f1f1;
+            color: #aaa;
+        }
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .guard-badge {
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            color: white;
+            margin-top: 2px;
+            display: block;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        /* Listas y Formularios */
+        ul { padding-left: 0; list-style: none; }
+        li { padding: 8px; margin-bottom: 5px; background: #fdfdfd; border: 1px solid #eee; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border-radius: 3px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Gestión de Guardias de Técnicos</h1>
+        <div>
+            <button class="btn btn-success" onclick="generarNuevoAno()">🔄 Rotar / Nuevo Año</button>
+        </div>
+    </header>
+
+    <div class="controls-panel">
+        <div class="card">
+            <h3>Tarifas de Guardia</h3>
+            <label>Precio Día Laboral (€):</label>
+            <input type="number" id="precioLaboral" value="28" onchange="actualizarTarifas()">
+            
+            <label>Precio Día Festivo (€):</label>
+            <input type="number" id="precioFestivo" value="70" onchange="actualizarTarifas()">
+            <p id="totalSemanaInfo" style="font-size: 13px; color: #666; margin-top: 5px;"></p>
+        </div>
+
+        <div class="card">
+            <h3>Técnicos y Colores</h3>
+            <ul id="listaTecnicos"></ul>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="nuevoNombreTecnico" placeholder="Nombre del técnico" style="margin-bottom:0;">
+                <input type="color" id="nuevoColorTecnico" value="#e74c3c" style="width: 50px; height: 38px; padding: 0; border: none; cursor: pointer;">
+                <button class="btn" onclick="agregarTecnico()">Añadir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="calendar-header">
+            <button class="btn" onclick="cambiarMes(-1)">❮ Mes Anterior</button>
+            <h2 id="mesAnoTitulo" style="margin: 0;">Mes Año</h2>
+            <button class="btn" onclick="cambiarMes(1)">Mes Siguiente ❯</button>
+        </div>
+        <div class="calendar-grid" id="nombresDias">
+            <div class="day-name">Lun</div>
+            <div class="day-name">Mar</div>
+            <div class="day-name">Mié</div>
+            <div class="day-name">Jue</div>
+            <div class="day-name">Vie</div>
+            <div class="day-name">Sáb</div>
+            <div class="day-name">Dom</div>
+        </div>
+        <div class="calendar-grid" id="cuadriculaDias" style="margin-top: 5px;"></div>
+    </div>
+</div>
+
+<script>
+    // Estado inicial de la aplicación
+    let fechaActual = new Date();
+    let tarifas = { laboral: 28, festivo: 70 };
+    
+    let tecnicos = [
+        { id: 1, nombre: "Lucas", color: "#e84393" },
+        { id: 2, nombre: "Óscar Ibarreta", color: "#d63031" },
+        { id: 3, nombre: "Jacobo", color: "#0984e3" },
+        { id: 4, nombre: "Óscar Idáñez", color: "#00b894" }
+    ];
+
+    // Festivos fijos de ejemplo (Mes 0-11, Día)
+    let festivos = [
+        { mes: 0, dia: 1, nombre: "Año Nuevo" },
+        { mes: 4, dia: 1, nombre: "Día del Trabajo" },
+        { mes: 11, dia: 25, nombre: "Navidad" }
+    ];
+
+    // Guardias asignadas por semana (Llave: "YYYY-MM-DD" del viernes de inicio, Valor: id_tecnico)
+    let asignacionGuardias = {};
+
+    function inicializarApp() {
+        renderizarTecnicos();
+        renderizarCalendario();
+        actualizarInfoTarifas();
+    }
+
+    function renderizarTecnicos() {
+        const lista = document.getElementById('listaTecnicos');
+        lista.innerHTML = '';
+        tecnicos.forEach(tec => {
+            lista.innerHTML += `
+                <li>
+                    <span><span class="legend-color" style="background:${tec.color}"></span>${tec.nombre}</span>
+                    <button class="btn" style="padding: 2px 6px; font-size: 11px; background: #e74c3c;" onclick="eliminarTecnico(${tec.id})">Eliminar</button>
+                </li>`;
+        });
+    }
+
+    function agregarTecnico() {
+        const nombreInput = document.getElementById('nuevoNombreTecnico');
+        const colorInput = document.getElementById('nuevoColorTecnico');
+        if(nombreInput.value.trim() === '') return;
+
+        const nuevoId = tecnicos.length > 0 ? Math.max(...tecnicos.map(t => t.id)) + 1 : 1;
+        tecnicos.push({ id: nuevoId, nombre: nombreInput.value.trim(), color: colorInput.value });
+        nombreInput.value = '';
+        renderizarTecnicos();
+        renderizarCalendario();
+    }
+
+    function eliminarTecnico(id) {
+        tecnicos = tecnicos.filter(t => t.id !== id);
+        renderizarTecnicos();
+        renderizarCalendario();
+    }
+
+    function cambiarMes(delta) {
+        fechaActual.setMonth(fechaActual.getMonth() + delta);
+        renderizarCalendario();
+    }
+
+    function obtenerViernesDeGuardia(fecha) {
+        // La guardia empieza en viernes. Buscamos el viernes de la semana actual o anterior.
+        let f = new Date(fecha);
+        let diaSemana = f.getDay(); // 0: Dom, 5: Vie, etc.
+        let distancia = (diaSemana >= 5) ? (5 - diaSemana) : -(2 + (4 - diaSemana));
+        f.setDate(f.getDate() + distancia);
+        f.setHours(0,0,0,0);
+        return f;
+    }
+
+    function obtenerTecnicoParaViernes(viernesDate) {
+        const clave = viernesDate.toISOString().split('T')[0];
+        if (asignacionGuardias[clave]) {
+            return tecnicos.find(t => t.id === asignacionGuardias[clave]);
+        }
+        
+        // Algoritmo de rotación automática basada en número de semana del año
+        if (tecnicos.length === 0) return null;
+        let startOfYear = new Date(viernesDate.getFullYear(), 0, 1);
+        let pastDays = Math.floor((viernesDate - startOfYear) / (24 * 60 * 60 * 1000));
+        let semanaNum = Math.floor(pastDays / 7);
+        let indiceTecnico = semanaNum % tecnicos.length;
+        return tecnicos[indiceTecnico];
+    }
+
+    function renderizarCalendario() {
+        const ano = fechaActual.getFullYear();
+        const mes = fechaActual.getMonth();
+        
+        const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        document.getElementById('mesAnoTitulo').innerText = `${mesesNombres[mes]} ${ano}`;
+
+        const primerDiaMes = new Date(ano, mes, 1);
+        const ultimoDiaMes = new Date(ano, mes + 1, 0);
+        
+        let primerDiaIndice = primerDiaMes.getDay() - 1; // Lunes como primer día
+        if (primerDiaIndice === -1) primerDiaIndice = 6;
+
+        const cuadricula = document.getElementById('cuadriculaDias');
+        cuadricula.innerHTML = '';
+
+        // Días del mes anterior para completar la semana
+        let prevMesUltimoDia = new Date(ano, mes, 0).getDate();
+        for (let i = primerDiaIndice - 1; i >= 0; i--) {
+            let diaNum = prevMesUltimoDia - i;
+            let fechaCelda = new Date(ano, mes - 1, diaNum);
+            cuadricula.appendChild(crearCeldaDia(diaNum, fechaCelda, true));
+        }
+
+        // Días del mes actual
+        for (let i = 1; i <= ultimoDiaMes.getDate(); i++) {
+            let fechaCelda = new Date(ano, mes, i);
+            cuadricula.appendChild(crearCeldaDia(i, fechaCelda, false));
+        }
+
+        // Días del mes siguiente para completar la cuadrícula
+        let totalCeldasActuales = primerDiaIndice + ultimoDiaMes.getDate();
+        let totalCeldasGrid = Math.ceil(totalCeldasActuales / 7) * 7;
+        let diasSiguientes = totalCeldasGrid - totalCeldasActuales;
+        for (let i = 1; i <= diasSiguientes; i++) {
+            let fechaCelda = new Date(ano, mes + 1, i);
+            cuadricula.appendChild(crearCeldaDia(i, fechaCelda, true));
+        }
+    }
+
+    function crearCeldaDia(diaNum, fecha, esOtroMes) {
+        const div = document.createElement('div');
+        div.className = `calendar-day ${esOtroMes ? 'other-month' : ''}`;
+        
+        div.innerHTML = `<div class="day-number">${diaNum}</div>`;
+
+        // Calcular qué técnico está de guardia este día (según ciclo Viernes a Viernes)
+        let viernesAsociado = obtenerViernesDeGuardia(fecha);
+        let tecnicoAsignado = obtenerTecnicoParaViernes(viernesAsociado);
+
+        if (tecnicoAsignado) {
+            div.innerHTML += `<span class="guard-badge" style="background-color: ${tecnicoAsignado.color};" title="Guardia (Viernes a Viernes)">👤 ${tecnicoAsignado.nombre}</span>`;
+        }
+
+        // Permitir modificar la guardia haciendo clic en el día
+        div.onclick = () => modificarGuardiaModal(viernesAsociado);
+
+        return div;
+    }
+
+    function modificarGuardiaModal(viernesDate) {
+        let fechaStr = viernesDate.toLocaleDateString();
+        let nombresOpciones = tecnicos.map(t => `${t.nombre} (ID: ${t.id})`).join('\n');
+        let respuesta = prompt(`Modificar guardia que inicia el Viernes ${fechaStr}.\nIntroduce el ID del nuevo técnico asignado:\n\n${nombresOpciones}`);
+        
+        if (respuesta !== null) {
+            let idTecnico = parseInt(respuesta);
+            if (tecnicos.some(t => t.id === idTecnico)) {
+                let clave = viernesDate.toISOString().split('T')[0];
+                asignacionGuardias[clave] = idTecnico;
+                renderizarCalendario();
+            } else {
+                alert("ID de técnico no válido.");
+            }
+        }
+    }
+
+    function actualizarTarifas() {
+        tarifas.laboral = parseFloat(document.getElementById('precioLaboral').value) || 0;
+        tarifas.festivo = parseFloat(document.getElementById('precioFestivo').value) || 0;
+        actualizarInfoTarifas();
+    }
+
+    function actualizarInfoTarifas() {
+        let totalSemana = (tarifas.laboral * 5) + (tarifas.festivo * 2); // Ejemplo 5 laborales, 2 festivos
+        document.getElementById('totalSemanaInfo').innerText = `Estimación semana tipo (5 lab, 2 fes): ${totalSemana} €`;
+    }
+
+    function generarNuevoAno() {
+        if(confirm("¿Estás seguro de generar un nuevo ciclo anual cambiando el orden de rotación para evitar repetir festivos?")) {
+            // Rotamos el orden del array de técnicos para desplazar el inicio del año
+            let primerTecnico = tecnicos.shift();
+            tecnicos.push(primerTecnico);
+            asignacionGuardias = {}; // Limpiamos modificaciones manuales para aplicar la nueva rotación
+            renderizarCalendario();
+            alert("¡Rotación anual aplicada con éxito!");
+        }
+    }
+
+    // Inicializar al cargar la página
+    window.onload = inicializarApp;
+</script>
+
+</body>
+</html>
