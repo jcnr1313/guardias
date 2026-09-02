@@ -139,15 +139,19 @@
         .badge-vacation { background: #10b981; color: white; }
         .badge-personal { background: #f59e0b; color: white; }
         .badge-guardia { background: #3b82f6; color: white; }
+        
+        .badge-status-past { background: #94a3b8; color: white; opacity: 0.7; }
+        .badge-status-upcoming { background: #3b82f6; color: white; }
 
-        .absences-sidebar-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
-        .absence-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.8rem; }
+        .absences-sidebar-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; margin-bottom: 15px; padding-right: 4px; }
+        .absence-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.8rem; gap: 8px; }
+        .absence-sidebar-item.is-past { opacity: 0.65; background: var(--bg-card); }
 
         .vacation-balance-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; margin-bottom: 15px; }
-        .vacation-balance-item { background: var(--bg-app); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+        .vacation-balance-item { background: var(--bg-app); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; }
         .vacation-balance-row { display: flex; justify-content: space-between; align-items: center; }
-        .vacation-inputs-row { display: flex; gap: 6px; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-card); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
-        .vacation-inputs-row input { width: 40px; padding: 2px; text-align: center; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: 4px; font-weight: 600; }
+        .vacation-inputs-row { display: flex; gap: 6px; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-card); padding: 8px; border-radius: 6px; border: 1px solid var(--border); }
+        .vacation-inputs-row input { width: 45px; padding: 3px; text-align: center; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: 4px; font-weight: 600; }
 
         #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #toast.show { transform: translateY(0); opacity: 1; }
@@ -306,7 +310,7 @@
                 <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
                     <li><strong style="color: var(--text-main);">Estado Activo:</strong> Muestra alertas animadas si el operario se encuentra hoy <span style="color:#10b981; font-weight:600;">de vacaciones</span>, disfrutando de <span style="color:#f59e0b; font-weight:600;">asuntos propios</span> o cubriendo la <span style="color:#3b82f6; font-weight:600;">guardia de la semana</span>.</li>
                     <li><strong style="color: var(--text-main);">Carga Anual:</strong> Indica las semanas totales asignadas y el porcentaje que representan sobre el total del año.</li>
-                    <li><strong style="color: var(--text-main);">Botón Editar:</strong> Permite cambiar el nombre o el color identificativo del trabajador en los calendarios.</li>
+                    <li><strong style="color: var(--text-main);">Control de Saldos:</strong> Muestra los días libres restantes calculados a partir de los 31 días base, restando los días de vacaciones programados, sumando o restando días extra y ajustes manuales.</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -424,7 +428,6 @@
         async function initApp() {
             await cargarDatosSupabase();
             
-            // Si no hay guardias cargadas de la nube, generamos el cuadrante automático de respaldo para evitar pantalla vacía
             if (Object.keys(guardiasSemanas).length === 0) {
                 generarCuadranteAnualAutomatico(true);
             } else {
@@ -435,13 +438,11 @@
         async function cargarDatosSupabase() {
             if (!dbSupabase) return;
             try {
-                // 1. Cargar técnicos
                 const { data: techData, error: errTech } = await dbSupabase.from('tecnicos').select('*');
                 if (!errTech && techData && techData.length > 0) {
                     tecnicos = techData;
                 }
 
-                // 2. Cargar ausencias
                 const { data: absData, error: errAbs } = await dbSupabase.from('ausencias').select('*');
                 if (!errAbs && absData) {
                     ausencias = absData.map(a => ({
@@ -453,7 +454,6 @@
                     }));
                 }
 
-                // 3. Cargar guardias semanales
                 const { data: guardData, error: errGuard } = await dbSupabase.from('guardias_semanas').select('*');
                 if (!errGuard && guardData && guardData.length > 0) {
                     guardiasSemanas = {};
@@ -462,7 +462,6 @@
                     });
                 }
 
-                // 4. Cargar saldos de vacaciones
                 const { data: vacData, error: errVac } = await dbSupabase.from('vacaciones_saldos').select('*');
                 if (!errVac && vacData) {
                     vacacionesData = {};
@@ -709,18 +708,31 @@
                 return;
             }
 
-            ausencias.forEach(abs => {
+            // Ordenar ausencias cronológicamente por fecha de inicio
+            let ausenciasOrdenadas = [...ausencias].sort((a, b) => new Date(a.start) - new Date(b.start));
+            let todayStr = new Date().toISOString().split('T')[0];
+
+            ausenciasOrdenadas.forEach(abs => {
                 const typeLabel = abs.type === 'vacation' ? '🌴 Vacaciones' : '☕ Asuntos Propios';
                 const badgeClass = abs.type === 'vacation' ? 'badge-vacation' : 'badge-personal';
+                
+                // Determinar si ya ha pasado completamente
+                let isPast = abs.end < todayStr;
+                let statusBadgeText = isPast ? 'Disfrutada / Pasada' : 'Próxima / En curso';
+                let statusBadgeClass = isPast ? 'badge-status-past' : 'badge-status-upcoming';
+
                 const item = document.createElement('div');
-                item.className = 'absence-sidebar-item';
+                item.className = `absence-sidebar-item ${isPast ? 'is-past' : ''}`;
                 item.innerHTML = `
-                    <div>
-                        <strong>${abs.techName}</strong><br>
-                        <span class="badge-absence ${badgeClass}">${typeLabel}</span>
-                        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${abs.start} al ${abs.end}</div>
+                    <div style="display:flex; flex-direction:column; gap:3px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <strong>${abs.techName}</strong>
+                            <span class="badge-absence ${badgeClass}">${typeLabel}</span>
+                        </div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">Del ${abs.start} al ${abs.end}</div>
+                        <div><span class="badge-absence ${statusBadgeClass}" style="font-size:0.55rem;">${statusBadgeText}</span></div>
                     </div>
-                    <button class="btn btn-danger" style="padding: 2px 6px; font-size:0.7rem;" onclick="deleteAbsence(${abs.id})">✕</button>
+                    <button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="deleteAbsence(${abs.id})" title="Eliminar ausencia">✕</button>
                 `;
                 container.appendChild(item);
             });
@@ -761,9 +773,10 @@
                         <span style="font-weight: 800; font-size: 0.95rem; color: ${diasRestantes < 0 ? '#ef4444' : '#10b981'};">${diasRestantes} días libres</span>
                     </div>
                     <div class="vacation-inputs-row">
+                        <span>Base: <b>31</b></span>
                         <span>Auto: <b>${diasCalendario}</b></span>
-                        <span>Extra: <input type="number" value="${data.extraDisfrutados}" onchange="actualizarSaldosSupabase('${t.name}', this.value, null)" title="Días extra"></span>
-                        <span>Ajuste(+/-): <input type="number" value="${data.ajusteManual}" onchange="actualizarSaldosSupabase('${t.name}', null, this.value)" title="Ajuste manual"></span>
+                        <span>Extra: <input type="number" value="${data.extraDisfrutados}" onchange="actualizarSaldosSupabase('${t.name}', this.value, null)" title="Días extra disfrutados"></span>
+                        <span>Ajuste: <input type="number" value="${data.ajusteManual}" onchange="actualizarSaldosSupabase('${t.name}', null, this.value)" title="Ajuste manual (+/-)"></span>
                     </div>
                 `;
                 container.appendChild(item);
