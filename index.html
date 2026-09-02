@@ -54,7 +54,6 @@
         
         .calendar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow-x: auto; }
         
-        /* Animación de cambio de mes (Fade & Slide) */
         .fade-slide { animation: fadeInSlide 0.35s ease-in-out; }
         @keyframes fadeInSlide {
             from { opacity: 0; transform: translateY(8px); }
@@ -101,45 +100,46 @@
         .tech-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .weekly-pay { font-weight: 800; font-size: 1.05rem; color: #16a34a; }
 
-        /* Animaciones y Destacados para Vacaciones y Asuntos Propios */
+        /* Animaciones y Destacados de Vacaciones Activas */
         @keyframes pulse-vacation {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); border-color: var(--success); }
-            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); border-color: var(--success); }
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); border-color: var(--success); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); border-color: var(--success); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: var(--success); }
         }
 
         @keyframes pulse-personal {
-            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); border-color: var(--warning); }
-            70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); border-color: var(--warning); }
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); border-color: var(--warning); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); border-color: var(--warning); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); border-color: var(--warning); }
         }
 
         .tech-mgmt-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 15px; }
-        .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); transition: all 0.3s ease; }
-        .tech-mgmt-item.on-vacation { animation: pulse-vacation 2.5s infinite; border-width: 2px; background-color: rgba(16, 185, 129, 0.05); }
-        .tech-mgmt-item.on-personal { animation: pulse-personal 2.5s infinite; border-width: 2px; background-color: rgba(245, 158, 11, 0.05); }
+        .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); transition: all 0.3s ease; }
+        .tech-mgmt-item.on-vacation { animation: pulse-vacation 2s infinite; border-width: 2px; background-color: rgba(16, 185, 129, 0.08); }
+        .tech-mgmt-item.on-personal { animation: pulse-personal 2s infinite; border-width: 2px; background-color: rgba(245, 158, 11, 0.08); }
 
         .tech-mgmt-row { display: flex; justify-content: space-between; align-items: center; }
         .tech-mgmt-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
         .progress-bar-container { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
         .progress-bar-fill { height: 100%; transition: width 0.5s ease; }
 
-        .badge-absence { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
-        .badge-vacation { background: #d1fae5; color: #065f46; }
-        [data-theme="dark"] .badge-vacation { background: #064e3b; color: #a7f3d0; }
-        .badge-personal { background: #fef3c7; color: #92400e; }
-        [data-theme="dark"] .badge-personal { background: #78350f; color: #fde68a; }
+        .badge-absence { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-vacation { background: #10b981; color: white; }
+        .badge-personal { background: #f59e0b; color: white; }
 
-        /* Lista de Ausencias en Sidebar */
         .absences-sidebar-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
         .absence-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.8rem; }
 
-        /* Notificación Toast Animada */
+        /* Control de Saldos de Vacaciones */
+        .vacation-balance-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
+        .vacation-balance-item { background: var(--bg-app); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+        .vacation-balance-row { display: flex; justify-content: space-between; align-items: center; }
+        .vacation-stats-pill { display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); justify-content: space-between; }
+
         #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #toast.show { transform: translateY(0); opacity: 1; }
         [data-theme="dark"] #toast { background: #f8fafc; color: #0f172a; }
 
-        /* Modales */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal { background: var(--bg-card); padding: 30px; border-radius: var(--radius-lg); width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 20px; border: 1px solid var(--border); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; }
@@ -200,8 +200,14 @@
                     <div class="absences-sidebar-list" id="absences-sidebar-list"></div>
                 </div>
 
+                <!-- CONTADOR AUTOMÁTICO DE VACACIONES (DISFRUTADAS VS RESTANTES) -->
                 <div class="card sidebar-card">
-                    <h3>⚙️ Gestión y Carga de Técnicos</h3>
+                    <h3>🏖️ Saldos de Vacaciones (Base: 31)</h3>
+                    <div class="vacation-balance-list" id="vacation-balance-list"></div>
+                </div>
+
+                <div class="card sidebar-card">
+                    <h3>⚙️ Gestión y Estado de Técnicos</h3>
                     <div class="tech-mgmt-list" id="tech-mgmt-list"></div>
                     <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openAddTechModal()">+ Añadir Técnico</button>
                 </div>
@@ -209,8 +215,7 @@
         </div>
     </div>
 
-    <!-- Notificación Toast -->
-    <div id="toast">¡Cuadrante actualizado con éxito!</div>
+    <div id="toast">¡Actualizado con éxito!</div>
 
     <!-- Modal Técnico -->
     <div class="modal-overlay" id="tech-modal-overlay">
@@ -237,7 +242,7 @@
         </div>
     </div>
 
-    <!-- Modal Ausencia (Vacaciones / Asuntos Propios) -->
+    <!-- Modal Ausencia -->
     <div class="modal-overlay" id="absence-modal-overlay">
         <div class="modal">
             <div class="modal-header">
@@ -274,7 +279,7 @@
 
     <script>
         let currentYear = 2026;
-        let currentMonth = 0;
+        let currentMonth = 8; // Septiembre por defecto para visualizar datos iniciales
 
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -287,27 +292,19 @@
 
         let ausencias = [
             { id: 1, techName: "J.Carlos", type: "vacation", start: "2026-09-01", end: "2026-09-10" },
-            { id: 2, techName: "Lucas", type: "personal", start: "2026-09-03", end: "2026-09-03" }
+            { id: 2, techName: "Lucas", type: "personal", start: "2026-09-03", end: "2026-09-05" }
         ];
 
         const festivosOficiales = {
             "0-1": [{type: "nac", label: "Año Nuevo"}],
             "0-6": [{type: "nac", label: "Epifanía del Señor"}],
-            "2-19": [{type: "loc", label: "San José (Local Valencia)"}],
-            "2-27": [{type: "loc", label: "Puente Fallas Local"}],
-            "3-3": [{type: "aut", label: "San Vicente Ferrer"}],
-            "3-6": [{type: "loc", label: "Local Valencia"}],
+            "2-19": [{type: "loc", label: "San José"}],
             "4-1": [{type: "nac", label: "Fiesta del Trabajo"}],
-            "5-24": [{type: "aut", label: "San Juan"}],
             "7-15": [{type: "nac", label: "Asunción de la Virgen"}],
             "9-9": [{type: "aut", label: "Día de la Comunitat Valenciana"}],
             "9-12": [{type: "nac", label: "Fiesta Nacional de España"}],
             "10-1": [{type: "nac", label: "Todos los Santos"}],
-            "11-4": [{type: "loc", label: "Local Valencia"}],
-            "11-6": [{type: "nac", label: "Día de la Constitución"}],
-            "11-8": [{type: "nac", label: "Inmaculada Concepción"}],
             "11-25": [{type: "nac", label: "Natividad del Señor"}],
-            "11-31": [{type: "loc", label: "Festivo Local Fin de Año"}],
         };
 
         let guardiasSemanas = {};
@@ -373,7 +370,7 @@
         }
 
         function generarNuevoAnio() {
-            if(confirm("¿Estás seguro de generar un nuevo cuadrante aleatorio rotando los técnicos para todo el año?")) {
+            if(confirm("¿Estás seguro de generar un nuevo cuadrante anual rotativo?")) {
                 guardiasSemanas = {};
                 let d = new Date(currentYear, 0, 1);
                 while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
@@ -387,7 +384,7 @@
                     d.setDate(d.getDate() + 7);
                 }
                 renderApp();
-                showToast("🎲 ¡Nuevo cuadrante anual generado con éxito!");
+                showToast("🎲 ¡Nuevo cuadrante anual generado!");
             }
         }
 
@@ -396,6 +393,7 @@
             renderCalendar();
             renderWeeklySummary();
             renderAbsencesSidebar();
+            renderVacationBalances();
             renderTechManagement();
         }
 
@@ -562,12 +560,50 @@
             });
         }
 
+        // CÁLCULO AUTOMÁTICO DE VACACIONES (31 DÍAS - DISFRUTADAS)
+        function renderVacationBalances() {
+            const container = document.getElementById('vacation-balance-list');
+            container.innerHTML = '';
+
+            tecnicos.forEach(t => {
+                let diasDisfrutados = 0;
+                ausencias.forEach(abs => {
+                    if (abs.techName === t.name && abs.type === 'vacation') {
+                        let start = new Date(abs.start);
+                        let end = new Date(abs.end);
+                        let diffTime = Math.abs(end - start);
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        diasDisfrutados += diffDays;
+                    }
+                });
+
+                let diasRestantes = 31 - diasDisfrutados;
+
+                const item = document.createElement('div');
+                item.className = 'vacation-balance-item';
+                item.innerHTML = `
+                    <div class="vacation-balance-row">
+                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700;">
+                            <span class="tech-color-dot" style="background: ${t.color}"></span>
+                            <span>${t.name}</span>
+                        </div>
+                        <span style="font-weight: 800; font-size: 0.95rem; color: ${diasRestantes < 0 ? '#ef4444' : '#10b981'};">${diasRestantes} días libres</span>
+                    </div>
+                    <div class="vacation-stats-pill">
+                        <span>Total base: <b>31</b></span>
+                        <span>Disfrutados: <b style="color:var(--text-main);">${diasDisfrutados}</b></span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
         function cambiarTecnicoSemana(fechaStr, nuevoTecnico) {
             guardiasSemanas[fechaStr] = nuevoTecnico;
             renderWeeklySummary();
             renderCalendar();
             renderTechManagement();
-            showToast("💾 Cambios guardados correctamente");
+            showToast("💾 Asignación semanal guardada");
         }
 
         function renderTechManagement() {
@@ -595,12 +631,13 @@
                 let itemClass = 'tech-mgmt-item';
                 let statusBadge = '';
 
+                // Animación y cuadro destacado si están de vacaciones hoy
                 if (currentAbsence === 'vacation') {
                     itemClass += ' on-vacation';
-                    statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones</span>';
+                    statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones Hoy</span>';
                 } else if (currentAbsence === 'personal') {
                     itemClass += ' on-personal';
-                    statusBadge = '<span class="badge-absence badge-personal">☕ Asuntos Propios</span>';
+                    statusBadge = '<span class="badge-absence badge-personal">☕ Asuntos Propios Hoy</span>';
                 }
 
                 const item = document.createElement('div');
@@ -610,11 +647,11 @@
                         <div class="tech-mgmt-info">
                             <span class="tech-color-dot" style="background: ${t.color}"></span>
                             <span>${t.name}</span>
-                            ${statusBadge}
                         </div>
                         <button class="btn btn-secondary" style="padding: 2px 8px; font-size:0.75rem;" onclick="openEditTechModal(${index})">Editar</button>
                     </div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                    ${statusBadge ? `<div style="margin-top:2px;">${statusBadge}</div>` : ''}
+                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top:2px;">
                         <span>Carga anual: ${assignedCount} semanas</span>
                         <span>${porcentaje}%</span>
                     </div>
@@ -668,7 +705,7 @@
 
             closeTechModal();
             renderApp();
-            showToast("✅ Técnico guardado correctamente");
+            showToast("✅ Técnico guardado");
         }
 
         function deleteTech() {
