@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,23 +16,34 @@
             --radius-lg: 16px;
             --radius-md: 8px;
             --shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        [data-theme="dark"] {
+            --bg-app: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
         body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; }
         .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
         header { background: var(--bg-card); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
-        header h1 { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+        header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
         .header-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         
-        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
         .btn-primary { background: #3b82f6; color: white; }
-        .btn-primary:hover { background: #2563eb; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
         .btn-secondary { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-main); }
         .btn-secondary:hover { background: var(--border); }
         .btn-danger { background: #fee2e2; color: #b91c1c; }
-        .btn-danger:hover { background: #fecaca; }
+        [data-theme="dark"] .btn-danger { background: #7f1d1d; color: #fecaca; }
+        .btn-danger:hover { opacity: 0.9; }
         
         .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
 
@@ -41,14 +52,22 @@
         
         .calendar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow-x: auto; }
         
+        /* Animación de cambio de mes (Fade & Slide) */
+        .fade-slide { animation: fadeInSlide 0.35s ease-in-out; }
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .calendar-legend { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
 
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
         
         .cal-header { text-align: center; font-weight: 700; font-size: 0.85rem; color: var(--text-muted); padding: 12px 5px; background: var(--bg-app); }
-        .cal-cell { background: var(--bg-card); min-height: 125px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .cal-cell.other-month { background: #f9fafb; opacity: 0.4; }
+        .cal-cell { background: var(--bg-card); min-height: 125px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .cal-cell:hover { z-index: 10; transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .cal-cell.other-month { background: var(--bg-app); opacity: 0.4; }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
         .day-num { font-weight: 700; font-size: 1.1rem; line-height: 1; }
@@ -56,9 +75,9 @@
         
         .fest-icons { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; max-width: 70px; }
         .fest-icon { font-size: 0.55rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; white-space: nowrap; }
-        .fest-nac { background-color: #dc2626; } /* España */
-        .fest-aut { background-color: #ea580c; } /* C. Valenciana */
-        .fest-loc { background-color: #9333ea; } /* Local Valencia */
+        .fest-nac { background-color: #dc2626; }
+        .fest-aut { background-color: #ea580c; }
+        .fest-loc { background-color: #9333ea; }
 
         .guardia-banner { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; text-align: center; margin: 6px 0; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -73,24 +92,34 @@
         .sidebar-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
         .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 5px; }
-        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; background: #fafafa; }
+        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-app); }
         .weekly-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         .weekly-details { display: flex; justify-content: space-between; align-items: center; }
         .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
         .tech-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .weekly-pay { font-weight: 800; font-size: 1.05rem; color: #16a34a; }
 
-        .tech-mgmt-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .tech-mgmt-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); }
-        .tech-mgmt-info { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
+        /* Barras de progreso de carga de técnicos */
+        .tech-mgmt-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 15px; }
+        .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); }
+        .tech-mgmt-row { display: flex; justify-content: space-between; align-items: center; }
+        .tech-mgmt-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
+        .progress-bar-container { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; transition: width 0.5s ease; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
-        .modal { background: var(--bg-card); padding: 30px; border-radius: var(--radius-lg); width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 20px; border: 1px solid var(--border); }
+        /* Notificación Toast Animada */
+        #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        [data-theme="dark"] #toast { background: #f8fafc; color: #0f172a; }
+
+        /* Modales */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal { background: var(--bg-card); padding: 30px; border-radius: var(--radius-lg); width: 400px; max-width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 20px; border: 1px solid var(--border); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; }
         .modal-body { display: flex; flex-direction: column; gap: 15px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 0.9rem; font-weight: 600; }
-        .form-group input { padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.9rem; }
+        .form-group input { padding: 10px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: var(--radius-md); font-size: 0.9rem; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
         .hidden { display: none !important; }
     </style>
@@ -101,6 +130,7 @@
         <header>
             <h1>📅 Cuadrante de Guardias</h1>
             <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-btn" title="Cambiar modo claro/oscuro">🌙</button>
                 <button class="btn btn-primary" onclick="generarNuevoAnio()">🎲 Generar Cuadrante Anual</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)">‹</button>
@@ -118,7 +148,7 @@
                     <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> C. Valenciana</div>
                     <div class="legend-item"><span class="fest-icon fest-loc">LOC</span> Local Valencia</div>
                 </div>
-                <div class="calendar-grid" id="calendar-grid-container">
+                <div class="calendar-grid fade-slide" id="calendar-grid-container">
                     <div class="cal-header">Lun</div>
                     <div class="cal-header">Mar</div>
                     <div class="cal-header">Mié</div>
@@ -136,13 +166,16 @@
                 </div>
 
                 <div class="card sidebar-card">
-                    <h3>⚙️ Gestión de Técnicos</h3>
+                    <h3>⚙️ Gestión y Carga de Técnicos</h3>
                     <div class="tech-mgmt-list" id="tech-mgmt-list"></div>
                     <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openAddTechModal()">+ Añadir Técnico</button>
                 </div>
             </aside>
         </div>
     </div>
+
+    <!-- Notificación Toast -->
+    <div id="toast">¡Cuadrante actualizado con éxito!</div>
 
     <!-- Modal Técnico -->
     <div class="modal-overlay" id="tech-modal-overlay">
@@ -171,7 +204,7 @@
 
     <script>
         let currentYear = 2026;
-        let currentMonth = 0; // Enero
+        let currentMonth = 0;
 
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -182,12 +215,11 @@
             { name: "Óscar Ibañez", color: "#3b82f6" }
         ];
 
-        // Festivos Oficiales (Formato clave "mes-dia", mes 0-indexed)
         const festivosOficiales = {
             "0-1": [{type: "nac", label: "Año Nuevo"}],
             "0-6": [{type: "nac", label: "Epifanía del Señor"}],
             "2-19": [{type: "loc", label: "San José (Local Valencia)"}],
-            "2-27": [{type: "loc", label: "Puente Fallas Local"}], // Ajustado según tu imagen
+            "2-27": [{type: "loc", label: "Puente Fallas Local"}],
             "3-3": [{type: "aut", label: "San Vicente Ferrer"}],
             "3-6": [{type: "loc", label: "Local Valencia"}],
             "4-1": [{type: "nac", label: "Fiesta del Trabajo"}],
@@ -205,16 +237,32 @@
 
         let guardiasSemanas = {};
 
+        function showToast(mensaje) {
+            const toast = document.getElementById('toast');
+            toast.innerText = mensaje;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerText = '☀️';
+            } else {
+                html.setAttribute('data-theme', 'light');
+                btn.innerText = '🌙';
+            }
+        }
+
         function getFestivosDelDia(month, day) {
             let festivos = [];
-            // Fines de semana (Sábados y Domingos)
             const date = new Date(currentYear, month, day);
             const dayOfWeek = date.getDay();
             if (dayOfWeek === 0 || dayOfWeek === 6) {
                 festivos.push({ type: "fin", label: "Fin de semana" });
             }
-
-            // Festivos específicos calendarizados
             const key = `${month}-${day}`;
             if (festivosOficiales[key]) {
                 festivos = festivos.concat(festivosOficiales[key]);
@@ -229,10 +277,8 @@
 
         function generarCuadranteAnualAutomatico() {
             if (Object.keys(guardiasSemanas).length > 0) return;
-            
             let d = new Date(currentYear, 0, 1);
             while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
-
             let techIndex = 0;
             while (d.getFullYear() === currentYear) {
                 const fechaStr = d.toISOString().split('T')[0];
@@ -247,11 +293,9 @@
                 guardiasSemanas = {};
                 let d = new Date(currentYear, 0, 1);
                 while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
-
                 let indices = Array.from(Array(tecnicos.length).keys());
                 indices.sort(() => Math.random() - 0.5);
                 let i = 0;
-
                 while (d.getFullYear() === currentYear) {
                     const fechaStr = d.toISOString().split('T')[0];
                     guardiasSemanas[fechaStr] = tecnicos[indices[i % indices.length]].name;
@@ -259,6 +303,7 @@
                     d.setDate(d.getDate() + 7);
                 }
                 renderApp();
+                showToast("🎲 ¡Nuevo cuadrante anual generado con éxito!");
             }
         }
 
@@ -271,6 +316,11 @@
 
         function renderCalendar() {
             const container = document.getElementById('calendar-grid-container');
+            // Forzar animación de transición al cambiar
+            container.classList.remove('fade-slide');
+            void container.offsetWidth; 
+            container.classList.add('fade-slide');
+
             container.innerHTML = `
                 <div class="cal-header">Lun</div>
                 <div class="cal-header">Mar</div>
@@ -289,7 +339,7 @@
                 const dayNum = prevMonthDays - i;
                 const cell = document.createElement('div');
                 cell.className = 'cal-cell other-month';
-                cell.innerHTML = `<span class="day-num" style="opacity:0.4">${dayNum}</span>`;
+                cell.innerHTML = `<span class="day-num">${dayNum}</span>`;
                 container.appendChild(cell);
             }
 
@@ -331,7 +381,7 @@
                         <span class="day-num">${day}</span>
                         <div class="fest-icons">${iconosHtml}</div>
                     </div>
-                    ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}33; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
+                    ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}22; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
                     <div class="day-rates">
                         <div class="rate-row lab"><span>Laboral</span><span class="rate-val">28€</span></div>
                         <div class="rate-row fes"><span>Festivo</span><span class="rate-val">70€</span></div>
@@ -347,25 +397,22 @@
 
             let d = new Date(currentYear, currentMonth, 1);
             while (d.getDay() !== 5) { d.setDate(d.getDate() - 1); }
-
             let finMes = new Date(currentYear, currentMonth + 1, 0);
 
             while (d <= finMes) {
                 let fechaStr = d.toISOString().split('T')[0];
                 let tecnico = guardiasSemanas[fechaStr] || "Sin asignar";
-                
                 let fechaFin = new Date(d);
                 fechaFin.setDate(fechaFin.getDate() + 7);
 
-                // Cálculo económico exacto de la semana (evaluando si cada día es festivo nacional, autonómico, local o finde)
                 let totalSemana = 0;
                 let dCalc = new Date(d);
                 for(let i = 0; i < 7; i++) {
                     let festivosDia = getFestivosDelDia(dCalc.getMonth(), dCalc.getDate());
                     if (festivosDia.length > 0) {
-                        totalSemana += 70; // Festivo / Finde
+                        totalSemana += 70;
                     } else {
-                        totalSemana += 28; // Laboral normal
+                        totalSemana += 28;
                     }
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
@@ -382,7 +429,7 @@
                     <div class="weekly-details">
                         <div class="weekly-tech">
                             <span class="tech-color-dot" style="background: ${color}"></span>
-                            <select onchange="cambiarTecnicoSemana('${fechaStr}', this.value)" style="border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-weight:600;">
+                            <select onchange="cambiarTecnicoSemana('${fechaStr}', this.value)" style="border:1px solid var(--border); background:var(--bg-card); color:var(--text-main); border-radius:4px; padding:2px 6px; font-weight:600;">
                                 ${tecnicos.map(t => `<option value="${t.name}" ${t.name === tecnico ? 'selected' : ''}>${t.name}</option>`).join('')}
                             </select>
                         </div>
@@ -390,29 +437,55 @@
                     </div>
                 `;
                 container.appendChild(item);
-
                 d.setDate(d.getDate() + 7);
             }
         }
 
         function cambiarTecnicoSemana(fechaStr, nuevoTecnico) {
             guardiasSemanas[fechaStr] = nuevoTecnico;
-            renderApp();
+            renderWeeklySummary();
+            renderCalendar();
+            renderTechManagement();
+            showToast("💾 Cambios guardados correctamente");
         }
 
         function renderTechManagement() {
             const container = document.getElementById('tech-mgmt-list');
             container.innerHTML = '';
 
+            // Calcular total de semanas asignadas por técnico para las barras de progreso
+            let conteoWeeks = {};
+            tecnicos.forEach(t => conteoWeeks[t.name] = 0);
+            let totalWeeksAssigned = 0;
+            for (let f in guardiasSemanas) {
+                let tech = guardiasSemanas[f];
+                if (conteoWeeks[tech] !== undefined) {
+                    conteoWeeks[tech]++;
+                }
+                totalWeeksAssigned++;
+            }
+
             tecnicos.forEach((t, index) => {
+                let assignedCount = conteoWeeks[t.name] || 0;
+                let porcentaje = totalWeeksAssigned > 0 ? Math.round((assignedCount / totalWeeksAssigned) * 100) : 0;
+
                 const item = document.createElement('div');
                 item.className = 'tech-mgmt-item';
                 item.innerHTML = `
-                    <div class="tech-mgmt-info">
-                        <span class="tech-color-dot" style="background: ${t.color}"></span>
-                        <span>${t.name}</span>
+                    <div class="tech-mgmt-row">
+                        <div class="tech-mgmt-info">
+                            <span class="tech-color-dot" style="background: ${t.color}"></span>
+                            <span>${t.name}</span>
+                        </div>
+                        <button class="btn btn-secondary" style="padding: 2px 8px; font-size:0.75rem;" onclick="openEditTechModal(${index})">Editar</button>
                     </div>
-                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size:0.8rem;" onclick="openEditTechModal(${index})">Editar</button>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                        <span>Carga anual: ${assignedCount} semanas</span>
+                        <span>${porcentaje}%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: ${porcentaje}%; background-color: ${t.color};"></div>
+                    </div>
                 `;
                 container.appendChild(item);
             });
@@ -460,6 +533,7 @@
 
             closeTechModal();
             renderApp();
+            showToast("✅ Técnico guardado correctamente");
         }
 
         function deleteTech() {
@@ -468,6 +542,7 @@
                 tecnicos.splice(index, 1);
                 closeTechModal();
                 renderApp();
+                showToast("🗑️ Técnico eliminado");
             }
         }
 
