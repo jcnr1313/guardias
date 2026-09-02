@@ -79,11 +79,11 @@
         .calendar-legend { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
 
-        /* CALENDARIO COMPACTO */
+        /* CALENDARIO MÁS COMPACTO Y ESTÉTICO */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
         
         .cal-header { text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); padding: 10px 4px; background: var(--bg-app); }
-        .cal-cell { background: var(--bg-card); min-height: 115px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .cal-cell { background: var(--bg-card); min-height: 105px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
         .cal-cell:hover { z-index: 10; transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .cal-cell.other-month { background: var(--bg-app); opacity: 0.4; }
         
@@ -97,10 +97,9 @@
         .fest-aut { background-color: #ea580c; }
         .fest-loc { background-color: #9333ea; }
 
-        .guardia-text-tag { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; text-align: center; margin: 2px 0; z-index: 2; padding: 2px; border-radius: 4px; background: rgba(255, 255, 255, 0.6); }
+        .guardia-banner { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 3px 4px; border-radius: 4px; text-align: center; margin: 4px 0; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
-        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; background: rgba(255, 255, 255, 0.5); padding: 2px 4px; border-radius: 4px; }
-        [data-theme="dark"] .day-rates, [data-theme="dark"] .guardia-text-tag { background: rgba(0, 0, 0, 0.2); }
+        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; }
         .rate-row { display: flex; justify-content: space-between; }
         .rate-val { font-weight: 600; }
         .cal-cell.is-festivo .rate-row.lab { text-decoration: line-through; opacity: 0.4; }
@@ -179,13 +178,35 @@
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
         .hidden { display: none !important; }
 
+        /* ESTILOS ESPECÍFICOS PARA IMPRESIÓN / PIZARRA */
         @media print {
-            body { background: white !important; color: black !important; padding: 10px; }
-            header, .sidebar, .header-actions, .btn, .calendar-card, #toast, .modal-overlay { display: none !important; }
-            .print-only-container { display: block !important; width: 100%; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 14px; }
-            .print-table th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 10px;
+            }
+            header, .sidebar, .header-actions, .btn, .calendar-card, #toast, .modal-overlay {
+                display: none !important;
+            }
+            .print-only-container {
+                display: block !important;
+                width: 100%;
+            }
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 10px;
+                text-align: left;
+                font-size: 14px;
+            }
+            .print-table th {
+                background-color: #eee !important;
+                -webkit-print-color-adjust: exact;
+            }
         }
         .print-only-container { display: none; }
     </style>
@@ -281,7 +302,9 @@
                     <th>Días Restantes</th>
                 </tr>
             </thead>
-            <tbody id="print-table-body"></tbody>
+            <tbody id="print-table-body">
+                <!-- Se llena dinámicamente -->
+            </tbody>
         </table>
     </div>
 
@@ -357,6 +380,12 @@
             <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
                 <p>El cálculo de días libres se realiza mediante la siguiente fórmula:</p>
                 <p style="text-align: center; font-weight: bold; color: var(--text-main); background: var(--bg-app); padding: 8px; border-radius: 6px;">Días Libres = Base (31) - Auto - Extra + Ajuste</p>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <li><strong style="color: var(--text-main);">Base (31):</strong> Total de días de vacaciones anuales asignados por convenio/empresa de partida.</li>
+                    <li><strong style="color: var(--text-main);">Auto:</strong> Días restados automáticamente al registrar periodos de vacaciones en la sección "Vacaciones y Ausencias".</li>
+                    <li><strong style="color: var(--text-main);">Extra:</strong> Campo editable para sumar días de vacaciones adicionales disfrutados que no estén metidos en el calendario.</li>
+                    <li><strong style="color: var(--text-main);">Ajuste:</strong> Campo numérico para sumar o restar días de forma manual (ej. <code>2</code> o <code>-1</code>).</li>
+                </ul>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="closeBalanceInfoModal()">Entendido</button>
@@ -381,6 +410,7 @@
     </div>
 
     <script>
+        // CONFIGURACIÓN DE SUPABASE INTEGRADA
         const SUPABASE_URL = 'https://nefnltsxblfpfrifdsgy.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_ICUgIbsQd736F6tkK1FxCw_DiyJiIFk';
         
@@ -408,19 +438,72 @@
         let vacacionesData = {};
         let guardiasSemanas = {};
 
+        // CUADRANTE MAESTRO OFICIAL EXACTO EXTRAÍDO DE TU IMAGEN
         const cuadranteOficial2026 = {
-            "2026-01-02": "J.Carlos", "2026-01-09": "Óscar Ibarreta", "2026-01-16": "Lucas", "2026-01-23": "Óscar Ibañez",
-            "2026-01-30": "J.Carlos", "2026-02-06": "Óscar Ibarreta", "2026-02-13": "Lucas", "2026-02-20": "Óscar Ibañez",
-            "2026-02-27": "J.Carlos", "2026-03-06": "Óscar Ibarreta", "2026-03-13": "Lucas", "2026-03-20": "Óscar Ibañez",
-            "2026-03-27": "J.Carlos", "2026-04-03": "Óscar Ibarreta", "2026-04-10": "Lucas", "2026-04-17": "Óscar Ibañez", "2026-04-24": "J.Carlos",
-            "2026-05-01": "Óscar Ibarreta", "2026-05-08": "Lucas", "2026-05-15": "Óscar Ibañez", "2026-05-22": "J.Carlos",
-            "2026-05-29": "Óscar Ibarreta", "2026-06-05": "Lucas", "2026-06-12": "Óscar Ibañez", "2026-06-19": "J.Carlos", "2026-06-26": "Óscar Ibarreta",
-            "2026-07-03": "Lucas", "2026-07-10": "Óscar Ibarreta", "2026-07-17": "J.Carlos", "2026-07-24": "Óscar Ibañez",
-            "2026-07-31": "J.Carlos", "2026-08-07": "Óscar Ibarreta", "2026-08-14": "Lucas", "2026-08-21": "Óscar Ibarreta", "2026-08-28": "Lucas",
-            "2026-09-04": "J.Carlos", "2026-09-11": "Óscar Ibañez", "2026-09-18": "Lucas", "2026-09-25": "Óscar Ibarreta",
-            "2026-10-02": "Óscar Ibañez", "2026-10-09": "J.Carlos", "2026-10-16": "Óscar Ibarreta", "2026-10-23": "Lucas", "2026-10-30": "Óscar Ibañez",
-            "2026-11-06": "J.Carlos", "2026-11-13": "Óscar Ibarreta", "2026-11-20": "Lucas", "2026-11-27": "Óscar Ibañez",
-            "2026-12-04": "J.Carlos", "2026-12-11": "Óscar Ibarreta", "2026-12-18": "Lucas", "2026-12-25": "Óscar Ibañez"
+            // ENERO
+            "2026-01-02": "J.Carlos",
+            "2026-01-09": "Óscar Ibarreta",
+            "2026-01-16": "Lucas",
+            "2026-01-23": "Óscar Ibañez",
+            // FEBRERO
+            "2026-01-30": "J.Carlos",
+            "2026-02-06": "Óscar Ibarreta",
+            "2026-02-13": "Lucas",
+            "2026-02-20": "Óscar Ibañez",
+            // MARZO
+            "2026-02-27": "J.Carlos",
+            "2026-03-06": "Óscar Ibarreta",
+            "2026-03-13": "Lucas",
+            "2026-03-20": "Óscar Ibañez",
+            // ABRIL
+            "2026-03-27": "J.Carlos",
+            "2026-04-03": "Óscar Ibarreta",
+            "2026-04-10": "Lucas",
+            "2026-04-17": "Óscar Ibañez",
+            "2026-04-24": "J.Carlos",
+            // MAYO
+            "2026-05-01": "Óscar Ibarreta",
+            "2026-05-08": "Lucas",
+            "2026-05-15": "Óscar Ibañez",
+            "2026-05-22": "J.Carlos",
+            // JUNIO
+            "2026-05-29": "Óscar Ibarreta",
+            "2026-06-05": "Lucas",
+            "2026-06-12": "Óscar Ibañez",
+            "2026-06-19": "J.Carlos",
+            "2026-06-26": "Óscar Ibarreta",
+            // JULIO
+            "2026-07-03": "Lucas",
+            "2026-07-10": "Óscar Ibarreta",
+            "2026-07-17": "J.Carlos",
+            "2026-07-24": "Óscar Ibañez",
+            // AGOSTO
+            "2026-07-31": "J.Carlos",
+            "2026-08-07": "Óscar Ibañez",
+            "2026-08-14": "Lucas",
+            "2026-08-21": "Óscar Ibarreta",
+            "2026-08-28": "Lucas",
+            // SEPTIEMBRE (Coincidente exactamente con tu captura)
+            "2026-09-04": "J.Carlos",
+            "2026-09-11": "Óscar Ibañez",
+            "2026-09-18": "Lucas", // Nota: En tu imagen del anual pone Lucas en el tramo final de septiembre
+            "2026-09-25": "Óscar Ibarreta",
+            // OCTUBRE
+            "2026-10-02": "Óscar Ibañez",
+            "2026-10-09": "J.Carlos",
+            "2026-10-16": "Óscar Ibarreta",
+            "2026-10-23": "Lucas",
+            "2026-10-30": "Óscar Ibañez",
+            // NOVIEMBRE
+            "2026-11-06": "J.Carlos",
+            "2026-11-13": "Óscar Ibarreta",
+            "2026-11-20": "Lucas",
+            "2026-11-27": "Óscar Ibañez",
+            // DICIEMBRE
+            "2026-12-04": "J.Carlos",
+            "2026-12-11": "Óscar Ibarreta",
+            "2026-12-18": "Lucas",
+            "2026-12-25": "Óscar Ibañez"
         };
 
         const festivosOficiales = {
@@ -484,7 +567,9 @@
                 dTemp.setDate(dTemp.getDate() - k);
                 if (dTemp.getDay() === 5) {
                     let fStr = dTemp.toISOString().split('T')[0];
-                    if (guardiasSemanas[fStr] === techName) return true;
+                    if (guardiasSemanas[fStr] === techName) {
+                        return true;
+                    }
                     break;
                 }
             }
@@ -493,6 +578,7 @@
 
         async function initApp() {
             await cargarDatosSupabase();
+            
             if (Object.keys(guardiasSemanas).length === 0) {
                 guardiasSemanas = { ...cuadranteOficial2026 };
             }
@@ -502,42 +588,58 @@
         async function cargarDatosSupabase() {
             if (!dbSupabase) return;
             try {
-                const { data: techData } = await dbSupabase.from('tecnicos').select('*');
-                if (techData && techData.length > 0) tecnicos = techData;
+                const { data: techData, error: errTech } = await dbSupabase.from('tecnicos').select('*');
+                if (!errTech && techData && techData.length > 0) {
+                    tecnicos = techData;
+                }
 
-                const { data: absData } = await dbSupabase.from('ausencias').select('*');
-                if (absData) {
+                const { data: absData, error: errAbs } = await dbSupabase.from('ausencias').select('*');
+                if (!errAbs && absData) {
                     ausencias = absData.map(a => ({
-                        id: a.id, techName: a.tech_name, type: a.type, start: a.start_date, end: a.end_date
+                        id: a.id,
+                        techName: a.tech_name,
+                        type: a.type,
+                        start: a.start_date,
+                        end: a.end_date
                     }));
                 }
 
-                const { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
-                if (guardData && guardData.length > 0) {
+                const { data: guardData, error: errGuard } = await dbSupabase.from('guardias_semanas').select('*');
+                if (!errGuard && guardData && guardData.length > 0) {
                     guardiasSemanas = {};
-                    guardData.forEach(row => { guardiasSemanas[row.fecha_inicio] = row.tecnico; });
-                }
-
-                const { data: vacData } = await dbSupabase.from('vacaciones_saldos').select('*');
-                if (vacData) {
-                    vacacionesData = {};
-                    vacData.forEach(v => {
-                        vacacionesData[v.tech_name] = { extraDisfrutados: v.extra_disfrutados || 0, ajusteManual: v.ajuste_manual || 0 };
+                    guardData.forEach(row => {
+                        guardiasSemanas[row.fecha_inicio] = row.tecnico;
                     });
                 }
-            } catch (error) { console.error("Error conectando con Supabase:", error); }
+
+                const { data: vacData, error: errVac } = await dbSupabase.from('vacaciones_saldos').select('*');
+                if (!errVac && vacData) {
+                    vacacionesData = {};
+                    vacData.forEach(v => {
+                        vacacionesData[v.tech_name] = {
+                            extraDisfrutados: v.extra_disfrutados || 0,
+                            ajusteManual: v.ajuste_manual || 0
+                        };
+                    });
+                }
+            } catch (error) {
+                console.error("Error conectando con Supabase:", error);
+            }
         }
 
         async function restaurarCuadranteOficial() {
             guardiasSemanas = { ...cuadranteOficial2026 };
             if (dbSupabase) {
                 try {
-                    let rowsToUpsert = Object.keys(guardiasSemanas).map(fecha => ({ fecha_inicio: fecha, tecnico: guardiasSemanas[fecha] }));
+                    let rowsToUpsert = Object.keys(guardiasSemanas).map(fecha => ({
+                        fecha_inicio: fecha,
+                        tecnico: guardiasSemanas[fecha]
+                    }));
                     await dbSupabase.from('guardias_semanas').upsert(rowsToUpsert, { onConflict: ['fecha_inicio'] });
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Error guardando cuadrante oficial:", e); }
             }
             renderApp();
-            showToast("✅ Cuadrante maestro oficial sincronizado");
+            showToast("✅ Cuadrante maestro oficial sincronizado con éxito");
         }
 
         function renderApp() {
@@ -588,7 +690,7 @@
                 let fechaStr = fechaActualObj.toISOString().split('T')[0];
 
                 let tecnicoGuardia = "";
-                let colorTecnico = "";
+                let colorTecnico = "#cbd5e1";
 
                 for (let k = 0; k < 7; k++) {
                     let dCheck = new Date(fechaActualObj);
@@ -601,12 +703,7 @@
                 }
 
                 let techObj = tecnicos.find(t => t.name === tecnicoGuardia);
-                if (techObj) {
-                    colorTecnico = techObj.color;
-                    // PINTAR LA CELDA CON EL COLOR DEL TÉCNICO (con transparencia elegante de fondo)
-                    cell.style.backgroundColor = `${colorTecnico}22`; 
-                    cell.style.borderColor = `${colorTecnico}66`;
-                }
+                if (techObj) colorTecnico = techObj.color;
 
                 let iconosHtml = '';
                 festivos.forEach(f => {
@@ -628,7 +725,7 @@
                         <span class="day-num">${day}</span>
                         <div class="fest-icons">${iconosHtml}</div>
                     </div>
-                    ${tecnicoGuardia ? `<div class="guardia-text-tag" style="color: ${colorTecnico};">${tecnicoGuardia}</div>` : ''}
+                    ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}22; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
                     ${badgeAbsenciaHtml}
                     <div class="day-rates">
                         <div class="rate-row lab"><span>Lab</span><span class="rate-val">28€</span></div>
@@ -693,12 +790,13 @@
             renderWeeklySummary();
             renderCalendar();
             renderTechManagement();
-            showToast("☁️ Guardia actualizada");
+            showToast("☁️ Guardia actualizada en la nube");
         }
 
         function renderAbsencesSidebar() {
             const container = document.getElementById('absences-sidebar-list');
             container.innerHTML = '';
+
             if (ausencias.length === 0) {
                 container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:10px;">No hay ausencias registradas.</div>';
                 return;
@@ -710,6 +808,7 @@
             ausenciasOrdenadas.forEach(abs => {
                 const typeLabel = abs.type === 'vacation' ? '🌴 Vacaciones' : '☕ Asuntos Propios';
                 const badgeClass = abs.type === 'vacation' ? 'badge-vacation' : 'badge-personal';
+                
                 let isPast = abs.end < todayStr;
                 let statusBadgeText = isPast ? 'Disfrutada' : 'Próxima';
                 let statusBadgeClass = isPast ? 'badge-status-past' : 'badge-status-upcoming';
@@ -725,7 +824,7 @@
                         <div style="font-size:0.7rem; color:var(--text-muted);">Del ${abs.start} al ${abs.end}</div>
                         <div><span class="badge-absence ${statusBadgeClass}" style="font-size:0.55rem;">${statusBadgeText}</span></div>
                     </div>
-                    <button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="deleteAbsence(${abs.id})">✕</button>
+                    <button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="deleteAbsence(${abs.id})" title="Eliminar ausencia">✕</button>
                 `;
                 container.appendChild(item);
             });
@@ -734,22 +833,33 @@
         function calcularResumenVacacionesArray() {
             let resultado = [];
             tecnicos.forEach(t => {
-                if (!vacacionesData[t.name]) vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                if (!vacacionesData[t.name]) {
+                    vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                }
+
                 let diasCalendario = 0;
                 let listaPeriodos = [];
                 ausencias.forEach(abs => {
                     if (abs.techName === t.name && abs.type === 'vacation') {
                         let start = new Date(abs.start);
                         let end = new Date(abs.end);
-                        let diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                        let diffTime = Math.abs(end - start);
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
                         diasCalendario += diffDays;
                         listaPeriodos.push(`Del ${abs.start.split('-').reverse().join('/')} al ${abs.end.split('-').reverse().join('/')}`);
                     }
                 });
+
                 let data = vacacionesData[t.name];
                 let totalDisfrutados = diasCalendario + Number(data.extraDisfrutados);
                 let diasRestantes = 31 - totalDisfrutados + Number(data.ajusteManual);
-                resultado.push({ name: t.name, periodos: listaPeriodos.length > 0 ? listaPeriodos.join(', ') : 'Sin definir', disfrutados: totalDisfrutados, restantes: diasRestantes });
+
+                resultado.push({
+                    name: t.name,
+                    periodos: listaPeriodos.length > 0 ? listaPeriodos.join(', ') : 'Sin definir',
+                    disfrutados: totalDisfrutados,
+                    restantes: diasRestantes
+                });
             });
             return resultado;
         }
@@ -757,37 +867,59 @@
         function enviarWhatsAppVacaciones() {
             let resumen = calcularResumenVacacionesArray();
             let mensaje = "🌴 *RESUMEN DE VACACIONES - TÉCNICOS* 🌴\n\n";
+
             resumen.forEach(item => {
-                mensaje += `👤 *${item.name}*\n📅 Fechas: ${item.periodos}\n🏖️ Disfrutados: ${item.disfrutados} días\n⏳ Restantes: ${item.restantes} días\n-----------------------------------\n`;
+                mensaje += `👤 *${item.name}*\n`;
+                mensaje += `📅 Fechas: ${item.periodos}\n`;
+                mensaje += `🏖️ Disfrutados: ${item.disfrutados} días\n`;
+                mensaje += `⏳ Restantes: ${item.restantes} días\n`;
+                mensaje += `-----------------------------------\n`;
             });
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`, '_blank');
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
         }
 
         function exportarPDFVacaciones() {
             let resumen = calcularResumenVacacionesArray();
             let tbody = document.getElementById('print-table-body');
             tbody.innerHTML = '';
+
             resumen.forEach(item => {
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${item.name}</strong></td><td>${item.periodos}</td><td>-</td><td><strong>${item.disfrutados} días</strong></td><td><strong>${item.restantes} días</strong></td>`;
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.periodos}</td>
+                    <td>-</td>
+                    <td><strong>${item.disfrutados} días</strong></td>
+                    <td><strong>${item.restantes} días</strong></td>
+                `;
                 tbody.appendChild(tr);
             });
+
             window.print();
         }
 
         function renderVacationBalances() {
             const container = document.getElementById('vacation-balance-list');
             container.innerHTML = '';
+
             tecnicos.forEach(t => {
-                if (!vacacionesData[t.name]) vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                if (!vacacionesData[t.name]) {
+                    vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                }
+
                 let diasCalendario = 0;
                 ausencias.forEach(abs => {
                     if (abs.techName === t.name && abs.type === 'vacation') {
                         let start = new Date(abs.start);
                         let end = new Date(abs.end);
-                        diasCalendario += Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                        let diffTime = Math.abs(end - start);
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        diasCalendario += diffDays;
                     }
                 });
+
                 let data = vacacionesData[t.name];
                 let totalDisfrutados = diasCalendario + Number(data.extraDisfrutados);
                 let diasRestantes = 31 - totalDisfrutados + Number(data.ajusteManual);
@@ -805,8 +937,8 @@
                     <div class="vacation-inputs-row">
                         <span>Base: <b>31</b></span>
                         <span>Auto: <b>${diasCalendario}</b></span>
-                        <span>Extra: <input type="number" value="${data.extraDisfrutados}" onchange="actualizarSaldosSupabase('${t.name}', this.value, null)"></span>
-                        <span>Ajuste: <input type="number" value="${data.ajusteManual}" onchange="actualizarSaldosSupabase('${t.name}', null, this.value)"></span>
+                        <span>Extra: <input type="number" value="${data.extraDisfrutados}" onchange="actualizarSaldosSupabase('${t.name}', this.value, null)" title="Días extra disfrutados"></span>
+                        <span>Ajuste: <input type="number" value="${data.ajusteManual}" onchange="actualizarSaldosSupabase('${t.name}', null, this.value)" title="Ajuste manual (+/-)"></span>
                     </div>
                 `;
                 container.appendChild(item);
@@ -817,9 +949,12 @@
             if (!vacacionesData[techName]) vacacionesData[techName] = { extraDisfrutados: 0, ajusteManual: 0 };
             if (extraVal !== null) vacacionesData[techName].extraDisfrutados = parseInt(extraVal) || 0;
             if (ajusteVal !== null) vacacionesData[techName].ajusteManual = parseInt(ajusteVal) || 0;
+
             if (dbSupabase) {
                 await dbSupabase.from('vacaciones_saldos').upsert({
-                    tech_name: techName, extra_disfrutados: vacacionesData[techName].extraDisfrutados, ajuste_manual: vacacionesData[techName].ajusteManual
+                    tech_name: techName,
+                    extra_disfrutados: vacacionesData[techName].extraDisfrutados,
+                    ajuste_manual: vacacionesData[techName].ajusteManual
                 }, { onConflict: ['tech_name'] });
             }
             renderVacationBalances();
@@ -830,11 +965,13 @@
             const container = document.getElementById('tech-mgmt-list');
             container.innerHTML = '';
             const todayStr = new Date().toISOString().split('T')[0];
+
             let conteoWeeks = {};
             tecnicos.forEach(t => conteoWeeks[t.name] = 0);
             let totalWeeksAssigned = 0;
             for (let f in guardiasSemanas) {
-                conteoWeeks[guardiasSemanas[f]] = (conteoWeeks[guardiasSemanas[f]] || 0) + 1;
+                let tech = guardiasSemanas[f];
+                if (conteoWeeks[tech] !== undefined) conteoWeeks[tech]++;
                 totalWeeksAssigned++;
             }
 
@@ -846,6 +983,7 @@
 
                 let itemClass = 'tech-mgmt-item';
                 let statusBadge = '';
+
                 if (currentAbsence === 'vacation') {
                     itemClass += ' on-vacation';
                     statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones Hoy</span>';
@@ -882,6 +1020,7 @@
 
         function openBalanceInfoModal() { document.getElementById('balance-info-modal-overlay').style.display = 'flex'; }
         function closeBalanceInfoModal() { document.getElementById('balance-info-modal-overlay').style.display = 'none'; }
+
         function openTechInfoModal() { document.getElementById('info-modal-overlay').style.display = 'flex'; }
         function closeTechInfoModal() { document.getElementById('info-modal-overlay').style.display = 'none'; }
 
@@ -908,6 +1047,7 @@
             const index = parseInt(document.getElementById('tech-index-edit').value);
             const name = document.getElementById('tech-name-input').value.trim();
             const color = document.getElementById('tech-color-input').value;
+
             if (!name) { alert("Introduce un nombre válido"); return; }
 
             if (index === -1) {
@@ -917,11 +1057,14 @@
                 let oldName = tecnicos[index].name;
                 tecnicos[index].name = name;
                 tecnicos[index].color = color;
-                if (dbSupabase) await dbSupabase.from('tecnicos').update({ name, color }).eq('name', oldName);
+                if (dbSupabase) {
+                    await dbSupabase.from('tecnicos').update({ name, color }).eq('name', oldName);
+                }
             }
+
             closeTechModal();
             renderApp();
-            showToast("☁️ Técnico guardado");
+            showToast("☁️ Técnico sincronizado");
         }
 
         async function deleteTech() {
@@ -929,7 +1072,9 @@
             if (index !== -1) {
                 let techName = tecnicos[index].name;
                 tecnicos.splice(index, 1);
-                if (dbSupabase) await dbSupabase.from('tecnicos').delete().eq('name', techName);
+                if (dbSupabase) {
+                    await dbSupabase.from('tecnicos').delete().eq('name', techName);
+                }
                 closeTechModal();
                 renderApp();
                 showToast("🗑️ Técnico eliminado");
@@ -949,18 +1094,23 @@
             const techName = document.getElementById('absence-tech-select').value;
             const type = document.getElementById('absence-type-select').value;
             const start = document.getElementById('absence-start-input').value;
-            const end = document.getElementById('absence-end-input'].value;
+            const end = document.getElementById('absence-end-input').value;
 
             if (!start || !end) { alert("Introduce las fechas."); return; }
             if (start > end) { alert("La fecha de inicio no puede ser posterior a la fin."); return; }
 
             let newAbs = { tech_name: techName, type, start_date: start, end_date: end };
+            
             if (dbSupabase) {
                 let { data, error } = await dbSupabase.from('ausencias').insert([newAbs]).select();
                 if (!error && data && data.length > 0) {
                     ausencias.push({ id: data[0].id, techName, type, start, end });
-                } else { ausencias.push({ id: Date.now(), techName, type, start, end }); }
-            } else { ausencias.push({ id: Date.now(), techName, type, start, end }); }
+                } else {
+                    ausencias.push({ id: Date.now(), techName, type, start, end });
+                }
+            } else {
+                ausencias.push({ id: Date.now(), techName, type, start, end });
+            }
 
             closeAbsenceModal();
             renderApp();
@@ -969,7 +1119,9 @@
 
         async function deleteAbsence(id) {
             ausencias = ausencias.filter(a => a.id !== id);
-            if (dbSupabase) await dbSupabase.from('ausencias').delete().eq('id', id);
+            if (dbSupabase) {
+                await dbSupabase.from('ausencias').delete().eq('id', id);
+            }
             renderApp();
             showToast("🗑️ Ausencia eliminada");
         }
