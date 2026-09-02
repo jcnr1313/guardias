@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Guardias - Técnicos</title>
+    <title>Gestión de Guardias y Vacaciones - Técnicos</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -17,6 +17,8 @@
             --radius-md: 8px;
             --shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #10b981;
+            --warning: #f59e0b;
         }
 
         [data-theme="dark"] {
@@ -89,7 +91,7 @@
 
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
         .sidebar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .sidebar-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .sidebar-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
 
         .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 5px; }
         .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-app); }
@@ -99,13 +101,38 @@
         .tech-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .weekly-pay { font-weight: 800; font-size: 1.05rem; color: #16a34a; }
 
-        /* Barras de progreso de carga de técnicos */
+        /* Animaciones y Destacados para Vacaciones y Asuntos Propios */
+        @keyframes pulse-vacation {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); border-color: var(--success); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); border-color: var(--success); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: var(--success); }
+        }
+
+        @keyframes pulse-personal {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); border-color: var(--warning); }
+            70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); border-color: var(--warning); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); border-color: var(--warning); }
+        }
+
         .tech-mgmt-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 15px; }
-        .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); }
+        .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); transition: all 0.3s ease; }
+        .tech-mgmt-item.on-vacation { animation: pulse-vacation 2.5s infinite; border-width: 2px; background-color: rgba(16, 185, 129, 0.05); }
+        .tech-mgmt-item.on-personal { animation: pulse-personal 2.5s infinite; border-width: 2px; background-color: rgba(245, 158, 11, 0.05); }
+
         .tech-mgmt-row { display: flex; justify-content: space-between; align-items: center; }
         .tech-mgmt-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
         .progress-bar-container { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
         .progress-bar-fill { height: 100%; transition: width 0.5s ease; }
+
+        .badge-absence { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-vacation { background: #d1fae5; color: #065f46; }
+        [data-theme="dark"] .badge-vacation { background: #064e3b; color: #a7f3d0; }
+        .badge-personal { background: #fef3c7; color: #92400e; }
+        [data-theme="dark"] .badge-personal { background: #78350f; color: #fde68a; }
+
+        /* Lista de Ausencias en Sidebar */
+        .absences-sidebar-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
+        .absence-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.8rem; }
 
         /* Notificación Toast Animada */
         #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -119,7 +146,7 @@
         .modal-body { display: flex; flex-direction: column; gap: 15px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 0.9rem; font-weight: 600; }
-        .form-group input { padding: 10px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: var(--radius-md); font-size: 0.9rem; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: var(--radius-md); font-size: 0.9rem; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
         .hidden { display: none !important; }
     </style>
@@ -128,7 +155,7 @@
 
     <div class="main-container">
         <header>
-            <h1>📅 Cuadrante de Guardias</h1>
+            <h1>📅 Cuadrante de Guardias y Vacaciones</h1>
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-btn" title="Cambiar modo claro/oscuro">🌙</button>
                 <button class="btn btn-primary" onclick="generarNuevoAnio()">🎲 Generar Cuadrante Anual</button>
@@ -163,6 +190,14 @@
                 <div class="card sidebar-card">
                     <h3>📋 Guardias Semanales (Viernes a Viernes)</h3>
                     <div class="weekly-summary-list" id="weekly-summary"></div>
+                </div>
+
+                <div class="card sidebar-card">
+                    <h3>
+                        🌴 Vacaciones y Ausencias
+                        <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="openAddAbsenceModal()">+ Registrar</button>
+                    </h3>
+                    <div class="absences-sidebar-list" id="absences-sidebar-list"></div>
                 </div>
 
                 <div class="card sidebar-card">
@@ -202,6 +237,41 @@
         </div>
     </div>
 
+    <!-- Modal Ausencia (Vacaciones / Asuntos Propios) -->
+    <div class="modal-overlay" id="absence-modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Registrar Vacaciones / Asuntos Propios</h3>
+                <button class="btn btn-secondary" onclick="closeAbsenceModal()" style="padding: 4px 8px;">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Técnico</label>
+                    <select id="absence-tech-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Ausencia</label>
+                    <select id="absence-type-select">
+                        <option value="vacation">🌴 Vacaciones</option>
+                        <option value="personal">☕ Asuntos Propios</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Inicio</label>
+                    <input type="date" id="absence-start-input">
+                </div>
+                <div class="form-group">
+                    <label>Fecha Fin</label>
+                    <input type="date" id="absence-end-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAbsenceModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveAbsence()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentYear = 2026;
         let currentMonth = 0;
@@ -213,6 +283,11 @@
             { name: "Óscar Ibarreta", color: "#ef4444" },
             { name: "Lucas", color: "#d946ef" },
             { name: "Óscar Ibañez", color: "#3b82f6" }
+        ];
+
+        let ausencias = [
+            { id: 1, techName: "J.Carlos", type: "vacation", start: "2026-09-01", end: "2026-09-10" },
+            { id: 2, techName: "Lucas", type: "personal", start: "2026-09-03", end: "2026-09-03" }
         ];
 
         const festivosOficiales = {
@@ -270,6 +345,15 @@
             return festivos;
         }
 
+        function getActiveAbsenceForTech(techName, dateStr) {
+            for (let abs of ausencias) {
+                if (abs.techName === techName && dateStr >= abs.start && dateStr <= abs.end) {
+                    return abs.type; 
+                }
+            }
+            return null;
+        }
+
         function initApp() {
             generarCuadranteAnualAutomatico();
             renderApp();
@@ -311,12 +395,12 @@
             document.getElementById('current-month-label').innerText = `${monthsNames[currentMonth]} ${currentYear}`;
             renderCalendar();
             renderWeeklySummary();
+            renderAbsencesSidebar();
             renderTechManagement();
         }
 
         function renderCalendar() {
             const container = document.getElementById('calendar-grid-container');
-            // Forzar animación de transición al cambiar
             container.classList.remove('fade-slide');
             void container.offsetWidth; 
             container.classList.add('fade-slide');
@@ -351,6 +435,8 @@
                 cell.className = `cal-cell ${isFestivo ? 'is-festivo' : ''}`;
 
                 let fechaActualObj = new Date(currentYear, currentMonth, day);
+                let fechaStr = fechaActualObj.toISOString().split('T')[0];
+
                 let tecnicoGuardia = "";
                 let colorTecnico = "#cbd5e1";
 
@@ -376,12 +462,21 @@
                     }
                 });
 
+                let absenceType = tecnicoGuardia ? getActiveAbsenceForTech(tecnicoGuardia, fechaStr) : null;
+                let badgeAbsenciaHtml = '';
+                if (absenceType === 'vacation') {
+                    badgeAbsenciaHtml = `<div style="font-size:0.65rem; background:#10b981; color:white; padding:2px 4px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">🌴 Vacaciones</div>`;
+                } else if (absenceType === 'personal') {
+                    badgeAbsenciaHtml = `<div style="font-size:0.65rem; background:#f59e0b; color:white; padding:2px 4px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">☕ Asuntos Propios</div>`;
+                }
+
                 cell.innerHTML = `
                     <div class="day-header-row">
                         <span class="day-num">${day}</span>
                         <div class="fest-icons">${iconosHtml}</div>
                     </div>
                     ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}22; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
+                    ${badgeAbsenciaHtml}
                     <div class="day-rates">
                         <div class="rate-row lab"><span>Laboral</span><span class="rate-val">28€</span></div>
                         <div class="rate-row fes"><span>Festivo</span><span class="rate-val">70€</span></div>
@@ -441,6 +536,32 @@
             }
         }
 
+        function renderAbsencesSidebar() {
+            const container = document.getElementById('absences-sidebar-list');
+            container.innerHTML = '';
+
+            if (ausencias.length === 0) {
+                container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:10px;">No hay ausencias registradas.</div>';
+                return;
+            }
+
+            ausencias.forEach(abs => {
+                const typeLabel = abs.type === 'vacation' ? '🌴 Vacaciones' : '☕ Asuntos Propios';
+                const badgeClass = abs.type === 'vacation' ? 'badge-vacation' : 'badge-personal';
+                const item = document.createElement('div');
+                item.className = 'absence-sidebar-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${abs.techName}</strong><br>
+                        <span class="badge-absence ${badgeClass}">${typeLabel}</span>
+                        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${abs.start} al ${abs.end}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 2px 6px; font-size:0.7rem;" onclick="deleteAbsence(${abs.id})">✕</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
         function cambiarTecnicoSemana(fechaStr, nuevoTecnico) {
             guardiasSemanas[fechaStr] = nuevoTecnico;
             renderWeeklySummary();
@@ -453,7 +574,8 @@
             const container = document.getElementById('tech-mgmt-list');
             container.innerHTML = '';
 
-            // Calcular total de semanas asignadas por técnico para las barras de progreso
+            const todayStr = new Date().toISOString().split('T')[0];
+
             let conteoWeeks = {};
             tecnicos.forEach(t => conteoWeeks[t.name] = 0);
             let totalWeeksAssigned = 0;
@@ -469,13 +591,26 @@
                 let assignedCount = conteoWeeks[t.name] || 0;
                 let porcentaje = totalWeeksAssigned > 0 ? Math.round((assignedCount / totalWeeksAssigned) * 100) : 0;
 
+                let currentAbsence = getActiveAbsenceForTech(t.name, todayStr);
+                let itemClass = 'tech-mgmt-item';
+                let statusBadge = '';
+
+                if (currentAbsence === 'vacation') {
+                    itemClass += ' on-vacation';
+                    statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones</span>';
+                } else if (currentAbsence === 'personal') {
+                    itemClass += ' on-personal';
+                    statusBadge = '<span class="badge-absence badge-personal">☕ Asuntos Propios</span>';
+                }
+
                 const item = document.createElement('div');
-                item.className = 'tech-mgmt-item';
+                item.className = itemClass;
                 item.innerHTML = `
                     <div class="tech-mgmt-row">
                         <div class="tech-mgmt-info">
                             <span class="tech-color-dot" style="background: ${t.color}"></span>
                             <span>${t.name}</span>
+                            ${statusBadge}
                         </div>
                         <button class="btn btn-secondary" style="padding: 2px 8px; font-size:0.75rem;" onclick="openEditTechModal(${index})">Editar</button>
                     </div>
@@ -544,6 +679,53 @@
                 renderApp();
                 showToast("🗑️ Técnico eliminado");
             }
+        }
+
+        function openAddAbsenceModal() {
+            const select = document.getElementById('absence-tech-select');
+            select.innerHTML = tecnicos.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+            document.getElementById('absence-start-input').value = new Date().toISOString().split('T')[0];
+            document.getElementById('absence-end-input').value = new Date().toISOString().split('T')[0];
+            document.getElementById('absence-modal-overlay').style.display = 'flex';
+        }
+
+        function closeAbsenceModal() {
+            document.getElementById('absence-modal-overlay').style.display = 'none';
+        }
+
+        function saveAbsence() {
+            const techName = document.getElementById('absence-tech-select').value;
+            const type = document.getElementById('absence-type-select').value;
+            const start = document.getElementById('absence-start-input').value;
+            const end = document.getElementById('absence-end-input').value;
+
+            if (!start || !end) {
+                alert("Introduce las fechas de inicio y fin.");
+                return;
+            }
+
+            if (start > end) {
+                alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+                return;
+            }
+
+            ausencias.push({
+                id: Date.now(),
+                techName,
+                type,
+                start,
+                end
+            });
+
+            closeAbsenceModal();
+            renderApp();
+            showToast("🌴 Ausencia registrada con éxito");
+        }
+
+        function deleteAbsence(id) {
+            ausencias = ausencias.filter(a => a.id !== id);
+            renderApp();
+            showToast("🗑️ Ausencia eliminada");
         }
 
         function changeMonth(dir) {
