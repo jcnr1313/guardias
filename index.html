@@ -79,26 +79,27 @@
         .calendar-legend { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
 
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
+        /* CALENDARIO MÁS COMPACTO Y ESTÉTICO */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
         
-        .cal-header { text-align: center; font-weight: 700; font-size: 0.85rem; color: var(--text-muted); padding: 12px 5px; background: var(--bg-app); }
-        .cal-cell { background: var(--bg-card); min-height: 125px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .cal-header { text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); padding: 10px 4px; background: var(--bg-app); }
+        .cal-cell { background: var(--bg-card); min-height: 105px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
         .cal-cell:hover { z-index: 10; transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .cal-cell.other-month { background: var(--bg-app); opacity: 0.4; }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
-        .day-num { font-weight: 700; font-size: 1.1rem; line-height: 1; }
+        .day-num { font-weight: 700; font-size: 1rem; line-height: 1; }
         .cal-cell.is-festivo .day-num { color: #dc2626; }
         
-        .fest-icons { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; max-width: 70px; }
-        .fest-icon { font-size: 0.55rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; white-space: nowrap; }
+        .fest-icons { display: flex; gap: 2px; flex-wrap: wrap; justify-content: flex-end; max-width: 60px; }
+        .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 1px 3px; border-radius: 3px; color: white; white-space: nowrap; }
         .fest-nac { background-color: #dc2626; }
         .fest-aut { background-color: #ea580c; }
         .fest-loc { background-color: #9333ea; }
 
-        .guardia-banner { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; text-align: center; margin: 6px 0; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .guardia-banner { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 3px 4px; border-radius: 4px; text-align: center; margin: 4px 0; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
-        .day-rates { display: flex; flex-direction: column; gap: 2px; font-size: 0.7rem; color: var(--text-muted); z-index: 2; margin-top: auto; }
+        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; }
         .rate-row { display: flex; justify-content: space-between; }
         .rate-val { font-weight: 600; }
         .cal-cell.is-festivo .rate-row.lab { text-decoration: line-through; opacity: 0.4; }
@@ -217,7 +218,7 @@
             <h1>📅 Cuadrante de Guardias y Vacaciones</h1>
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-btn" title="Cambiar modo claro/oscuro">🌙</button>
-                <button class="btn btn-primary" onclick="generarNuevoAnio()">🎲 Generar Cuadrante Anual Equitativo</button>
+                <button class="btn btn-primary" onclick="restaurarCuadranteOficial()">🔄 Sincronizar Cuadrante Maestro Oficial</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)">‹</button>
                     <span id="current-month-label" style="min-width: 180px; text-align: center;"></span>
@@ -320,7 +321,7 @@
                 <input type="hidden" id="tech-index-edit" value="-1">
                 <div class="form-group">
                     <label>Nombre</label>
-                    <input type="text" id="tech-name-input" placeholder="Ej. Juan Carlos">
+                    <input type="text" id="tech-name-input" placeholder="Ej. J.Carlos">
                 </div>
                 <div class="form-group">
                     <label>Color</label>
@@ -382,9 +383,8 @@
                 <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
                     <li><strong style="color: var(--text-main);">Base (31):</strong> Total de días de vacaciones anuales asignados por convenio/empresa de partida.</li>
                     <li><strong style="color: var(--text-main);">Auto:</strong> Días restados automáticamente al registrar periodos de vacaciones en la sección "Vacaciones y Ausencias".</li>
-                    <li><strong style="color: var(--text-main);">Extra:</strong> Campo editable para sumar días de vacaciones adicionales disfrutados que no estén metidos en el calendario (o días extra acumulados).</li>
-                    <li><strong style="color: var(--text-main);">Ajuste:</strong> Campo numérico para sumar o restar días de forma manual (permite poner valores positivos o negativos, ej. <code>2</code> o <code>-1</code>) para correcciones de saldo puntuales.</li>
-                    <li><strong style="color: var(--text-main);">Cómo sumar/quitar:</strong> Simplemente haz clic dentro de las cajitas de texto de <em>Extra</em> o <em>Ajuste</em> de cada técnico y cambia el número; se guardará automáticamente en la nube al instante.</li>
+                    <li><strong style="color: var(--text-main);">Extra:</strong> Campo editable para sumar días de vacaciones adicionales disfrutados que no estén metidos en el calendario.</li>
+                    <li><strong style="color: var(--text-main);">Ajuste:</strong> Campo numérico para sumar o restar días de forma manual (ej. <code>2</code> o <code>-1</code>).</li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -401,11 +401,7 @@
                 <button class="btn btn-secondary" onclick="closeTechInfoModal()" style="padding: 4px 8px;">✕</button>
             </div>
             <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
-                <p>Esta sección resume la disponibilidad actual y el reparto de carga de trabajo de cada técnico:</p>
-                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-                    <li><strong style="color: var(--text-main);">Estado Activo:</strong> Muestra alertas animadas si el operario se encuentra hoy <span style="color:#10b981; font-weight:600;">de vacaciones</span>, disfrutando de <span style="color:#f59e0b; font-weight:600;">asuntos propios</span> o cubriendo la <span style="color:#3b82f6; font-weight:600;">guardia de la semana</span>.</li>
-                    <li><strong style="color: var(--text-main);">Carga Anual:</strong> Indica las semanas totales asignadas y el porcentaje que representan sobre el total del año.</li>
-                </ul>
+                <p>Esta sección resume la disponibilidad actual y el reparto de carga de trabajo de cada técnico.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="closeTechInfoModal()">Entendido</button>
@@ -442,10 +438,72 @@
         let vacacionesData = {};
         let guardiasSemanas = {};
 
-        let historicoFestivosAnioAnterior = {
-            "0-1": "J.Carlos",
-            "4-1": "Lucas",
-            "7-15": "Óscar Ibarreta"
+        // CUADRANTE MAESTRO OFICIAL EXACTO EXTRAÍDO DE TU IMAGEN
+        const cuadranteOficial2026 = {
+            // ENERO
+            "2026-01-02": "J.Carlos",
+            "2026-01-09": "Óscar Ibarreta",
+            "2026-01-16": "Lucas",
+            "2026-01-23": "Óscar Ibañez",
+            // FEBRERO
+            "2026-01-30": "J.Carlos",
+            "2026-02-06": "Óscar Ibarreta",
+            "2026-02-13": "Lucas",
+            "2026-02-20": "Óscar Ibañez",
+            // MARZO
+            "2026-02-27": "J.Carlos",
+            "2026-03-06": "Óscar Ibarreta",
+            "2026-03-13": "Lucas",
+            "2026-03-20": "Óscar Ibañez",
+            // ABRIL
+            "2026-03-27": "J.Carlos",
+            "2026-04-03": "Óscar Ibarreta",
+            "2026-04-10": "Lucas",
+            "2026-04-17": "Óscar Ibañez",
+            "2026-04-24": "J.Carlos",
+            // MAYO
+            "2026-05-01": "Óscar Ibarreta",
+            "2026-05-08": "Lucas",
+            "2026-05-15": "Óscar Ibañez",
+            "2026-05-22": "J.Carlos",
+            // JUNIO
+            "2026-05-29": "Óscar Ibarreta",
+            "2026-06-05": "Lucas",
+            "2026-06-12": "Óscar Ibañez",
+            "2026-06-19": "J.Carlos",
+            "2026-06-26": "Óscar Ibarreta",
+            // JULIO
+            "2026-07-03": "Lucas",
+            "2026-07-10": "Óscar Ibarreta",
+            "2026-07-17": "J.Carlos",
+            "2026-07-24": "Óscar Ibañez",
+            // AGOSTO
+            "2026-07-31": "J.Carlos",
+            "2026-08-07": "Óscar Ibañez",
+            "2026-08-14": "Lucas",
+            "2026-08-21": "Óscar Ibarreta",
+            "2026-08-28": "Lucas",
+            // SEPTIEMBRE (Coincidente exactamente con tu captura)
+            "2026-09-04": "J.Carlos",
+            "2026-09-11": "Óscar Ibañez",
+            "2026-09-18": "Lucas", // Nota: En tu imagen del anual pone Lucas en el tramo final de septiembre
+            "2026-09-25": "Óscar Ibarreta",
+            // OCTUBRE
+            "2026-10-02": "Óscar Ibañez",
+            "2026-10-09": "J.Carlos",
+            "2026-10-16": "Óscar Ibarreta",
+            "2026-10-23": "Lucas",
+            "2026-10-30": "Óscar Ibañez",
+            // NOVIEMBRE
+            "2026-11-06": "J.Carlos",
+            "2026-11-13": "Óscar Ibarreta",
+            "2026-11-20": "Lucas",
+            "2026-11-27": "Óscar Ibañez",
+            // DICIEMBRE
+            "2026-12-04": "J.Carlos",
+            "2026-12-11": "Óscar Ibarreta",
+            "2026-12-18": "Lucas",
+            "2026-12-25": "Óscar Ibañez"
         };
 
         const festivosOficiales = {
@@ -522,10 +580,9 @@
             await cargarDatosSupabase();
             
             if (Object.keys(guardiasSemanas).length === 0) {
-                generarCuadranteAnualAutomatico(true);
-            } else {
-                renderApp();
+                guardiasSemanas = { ...cuadranteOficial2026 };
             }
+            renderApp();
         }
 
         async function cargarDatosSupabase() {
@@ -567,66 +624,11 @@
                 }
             } catch (error) {
                 console.error("Error conectando con Supabase:", error);
-                showToast("⚠️ Modo local (Sin conexión en nube)");
             }
         }
 
-        async function generarCuadranteAnualAutomatico(esSilencioso = false) {
-            if (Object.keys(guardiasSemanas).length > 0 && !esSilencioso) {
-                const confirmar = confirm("⚠️ ¿Deseas generar un nuevo cuadrante anual?");
-                if (!confirmar) return;
-            }
-
-            guardiasSemanas = {};
-            let semanasAsignadas = {};
-            let festivosAsignados = {};
-            tecnicos.forEach(t => {
-                semanasAsignadas[t.name] = 0;
-                festivosAsignados[t.name] = 0;
-            });
-
-            let d = new Date(currentYear, 0, 1);
-            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
-
-            let listadoSemanas = [];
-            while (d.getFullYear() === currentYear) {
-                let fechaStr = d.toISOString().split('T')[0];
-                let countFestivosSemana = 0;
-                let clavesFestivosEnSemana = [];
-                let dCalc = new Date(d);
-                for (let i = 0; i < 7; i++) {
-                    let m = dCalc.getMonth();
-                    let dayNum = dCalc.getDate();
-                    let key = `${m}-${dayNum}`;
-                    let fList = getFestivosDelDia(m, dayNum);
-                    if (fList.some(f => f.type !== 'fin')) {
-                        countFestivosSemana++;
-                        clavesFestivosEnSemana.push(key);
-                    }
-                    dCalc.setDate(dCalc.getDate() + 1);
-                }
-
-                listadoSemanas.push({ fechaStr, festivosCount: countFestivosSemana, clavesFestivos: clavesFestivosEnSemana });
-                d.setDate(d.getDate() + 7);
-            }
-
-            listadoSemanas.sort((a, b) => b.festivosCount - a.festivosCount);
-
-            listadoSemanas.forEach(semana => {
-                let tecnicosOrdenados = [...tecnicos].sort((a, b) => {
-                    let hizoPasadoA = semana.clavesFestivos.some(k => historicoFestivosAnioAnterior[k] === a.name);
-                    let hizoPasadoB = semana.clavesFestivos.some(k => historicoFestivosAnioAnterior[k] === b.name);
-                    if (hizoPasadoA !== hizoPasadoB) return hizoPasadoA ? 1 : -1;
-                    if (festivosAsignados[a.name] !== festivosAsignados[b.name]) return festivosAsignados[a.name] - festivosAsignados[b.name];
-                    return semanasAsignadas[a.name] - semanasAsignadas[b.name];
-                });
-
-                let elegido = tecnicosOrdenados[0].name;
-                guardiasSemanas[semana.fechaStr] = elegido;
-                semanasAsignadas[elegido]++;
-                festivosAsignados[elegido] += semana.festivosCount;
-            });
-
+        async function restaurarCuadranteOficial() {
+            guardiasSemanas = { ...cuadranteOficial2026 };
             if (dbSupabase) {
                 try {
                     let rowsToUpsert = Object.keys(guardiasSemanas).map(fecha => ({
@@ -634,11 +636,10 @@
                         tecnico: guardiasSemanas[fecha]
                     }));
                     await dbSupabase.from('guardias_semanas').upsert(rowsToUpsert, { onConflict: ['fecha_inicio'] });
-                } catch(e) { console.error("Error guardando cuadrante:", e); }
+                } catch(e) { console.error("Error guardando cuadrante oficial:", e); }
             }
-
             renderApp();
-            if (!esSilencioso) showToast("🎲 ¡Cuadrante anual generado y sincronizado!");
+            showToast("✅ Cuadrante maestro oficial sincronizado con éxito");
         }
 
         function renderApp() {
@@ -714,9 +715,9 @@
                 let absenceType = tecnicoGuardia ? getActiveAbsenceForTech(tecnicoGuardia, fechaStr) : null;
                 let badgeAbsenciaHtml = '';
                 if (absenceType === 'vacation') {
-                    badgeAbsenciaHtml = `<div style="font-size:0.65rem; background:#10b981; color:white; padding:2px 4px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">🌴 Vacaciones</div>`;
+                    badgeAbsenciaHtml = `<div style="font-size:0.6rem; background:#10b981; color:white; padding:1px 3px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">🌴 Vacaciones</div>`;
                 } else if (absenceType === 'personal') {
-                    badgeAbsenciaHtml = `<div style="font-size:0.65rem; background:#f59e0b; color:white; padding:2px 4px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">☕ Asuntos Propios</div>`;
+                    badgeAbsenciaHtml = `<div style="font-size:0.6rem; background:#f59e0b; color:white; padding:1px 3px; border-radius:3px; text-align:center; font-weight:bold; margin-top:2px;">☕ Asuntos</div>`;
                 }
 
                 cell.innerHTML = `
@@ -727,8 +728,8 @@
                     ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}22; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
                     ${badgeAbsenciaHtml}
                     <div class="day-rates">
-                        <div class="rate-row lab"><span>Laboral</span><span class="rate-val">28€</span></div>
-                        <div class="rate-row fes"><span>Festivo</span><span class="rate-val">70€</span></div>
+                        <div class="rate-row lab"><span>Lab</span><span class="rate-val">28€</span></div>
+                        <div class="rate-row fes"><span>Fes</span><span class="rate-val">70€</span></div>
                     </div>
                 `;
                 container.appendChild(cell);
@@ -809,7 +810,7 @@
                 const badgeClass = abs.type === 'vacation' ? 'badge-vacation' : 'badge-personal';
                 
                 let isPast = abs.end < todayStr;
-                let statusBadgeText = isPast ? 'Disfrutada / Pasada' : 'Próxima / En curso';
+                let statusBadgeText = isPast ? 'Disfrutada' : 'Próxima';
                 let statusBadgeClass = isPast ? 'badge-status-past' : 'badge-status-upcoming';
 
                 const item = document.createElement('div');
@@ -863,7 +864,6 @@
             return resultado;
         }
 
-        // Función para enviar resumen de vacaciones por WhatsApp
         function enviarWhatsAppVacaciones() {
             let resumen = calcularResumenVacacionesArray();
             let mensaje = "🌴 *RESUMEN DE VACACIONES - TÉCNICOS* 🌴\n\n";
@@ -880,7 +880,6 @@
             window.open(url, '_blank');
         }
 
-        // Función para exportar a PDF / Imprimir para la Pizarra
         function exportarPDFVacaciones() {
             let resumen = calcularResumenVacacionesArray();
             let tbody = document.getElementById('print-table-body');
@@ -1008,7 +1007,7 @@
                     </div>
                     ${statusBadge ? `<div style="margin-top:2px;">${statusBadge}</div>` : ''}
                     <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top:2px;">
-                        <span>Carga anual: ${assignedCount} semanas</span>
+                        <span>Carga: ${assignedCount} sem.</span>
                         <span>${porcentaje}%</span>
                     </div>
                     <div class="progress-bar-container">
