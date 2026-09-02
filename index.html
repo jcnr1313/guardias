@@ -420,24 +420,30 @@
             return false;
         }
 
-        // CARGA ASÍNCRONA DESDE SUPABASE
+        // CARGA ASÍNCRONA DESDE SUPABASE CON RESPALDO LOCAL SEGURO
         async function initApp() {
             await cargarDatosSupabase();
-            renderApp();
+            
+            // Si no hay guardias cargadas de la nube, generamos el cuadrante automático de respaldo para evitar pantalla vacía
+            if (Object.keys(guardiasSemanas).length === 0) {
+                generarCuadranteAnualAutomatico(true);
+            } else {
+                renderApp();
+            }
         }
 
         async function cargarDatosSupabase() {
             if (!dbSupabase) return;
             try {
                 // 1. Cargar técnicos
-                const { data: techData } = await dbSupabase.from('tecnicos').select('*');
-                if (techData && techData.length > 0) {
+                const { data: techData, error: errTech } = await dbSupabase.from('tecnicos').select('*');
+                if (!errTech && techData && techData.length > 0) {
                     tecnicos = techData;
                 }
 
                 // 2. Cargar ausencias
-                const { data: absData } = await dbSupabase.from('ausencias').select('*');
-                if (absData) {
+                const { data: absData, error: errAbs } = await dbSupabase.from('ausencias').select('*');
+                if (!errAbs && absData) {
                     ausencias = absData.map(a => ({
                         id: a.id,
                         techName: a.tech_name,
@@ -448,19 +454,17 @@
                 }
 
                 // 3. Cargar guardias semanales
-                const { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
-                if (guardData && guardData.length > 0) {
+                const { data: guardData, error: errGuard } = await dbSupabase.from('guardias_semanas').select('*');
+                if (!errGuard && guardData && guardData.length > 0) {
                     guardiasSemanas = {};
                     guardData.forEach(row => {
                         guardiasSemanas[row.fecha_inicio] = row.tecnico;
                     });
-                } else {
-                    generarCuadranteAnualAutomatico(true);
                 }
 
                 // 4. Cargar saldos de vacaciones
-                const { data: vacData } = await dbSupabase.from('vacaciones_saldos').select('*');
-                if (vacData) {
+                const { data: vacData, error: errVac } = await dbSupabase.from('vacaciones_saldos').select('*');
+                if (!errVac && vacData) {
                     vacacionesData = {};
                     vacData.forEach(v => {
                         vacacionesData[v.tech_name] = {
@@ -531,7 +535,6 @@
                 festivosAsignados[elegido] += semana.festivosCount;
             });
 
-            // Guardar masivamente en Supabase si está activo
             if (dbSupabase) {
                 try {
                     let rowsToUpsert = Object.keys(guardiasSemanas).map(fecha => ({
@@ -921,8 +924,10 @@
             
             if (dbSupabase) {
                 let { data, error } = await dbSupabase.from('ausencias').insert([newAbs]).select();
-                if (data && data.length > 0) {
+                if (!error && data && data.length > 0) {
                     ausencias.push({ id: data[0].id, techName, type, start, end });
+                } else {
+                    ausencias.push({ id: Date.now(), techName, type, start, end });
                 }
             } else {
                 ausencias.push({ id: Date.now(), techName, type, start, end });
@@ -930,7 +935,7 @@
 
             closeAbsenceModal();
             renderApp();
-            showToast("☁️ Ausencia guardada en la nube");
+            showToast("☁️ Ausencia guardada");
         }
 
         async function deleteAbsence(id) {
@@ -949,7 +954,7 @@
             renderApp();
         }
 
-        // Arrancar la app cargando desde Supabase
+        // Arrancar la app
         initApp();
     </script>
 </body>
