@@ -168,7 +168,7 @@
             <h1>📅 Cuadrante de Guardias y Vacaciones</h1>
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-btn" title="Cambiar modo claro/oscuro">🌙</button>
-                <button class="btn btn-primary" onclick="generarNuevoAnio()">🎲 Generar Cuadrante Anual</button>
+                <button class="btn btn-primary" onclick="generarNuevoAnio()">🎲 Generar Cuadrante Anual Equitativo</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)">‹</button>
                     <span id="current-month-label" style="min-width: 180px; text-align: center;"></span>
@@ -305,7 +305,6 @@
             { id: 2, techName: "Lucas", type: "personal", start: "2026-09-03", end: "2026-09-05" }
         ];
 
-        // Almacena ajustes manuales extras por técnico (ej: { "J.Carlos": { extraDisfrutados: 2, ajusteManual: 0 } })
         let vacacionesData = {};
 
         const festivosOficiales = {
@@ -387,33 +386,75 @@
 
         function generarCuadranteAnualAutomatico() {
             if (Object.keys(guardiasSemanas).length > 0) return;
-            let d = new Date(currentYear, 0, 1);
-            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
-            let techIndex = 0;
-            while (d.getFullYear() === currentYear) {
-                const fechaStr = d.toISOString().split('T')[0];
-                guardiasSemanas[fechaStr] = tecnicos[techIndex % tecnicos.length].name;
-                techIndex++;
-                d.setDate(d.getDate() + 7);
-            }
+            generarNuevoAnio(true);
         }
 
-        function generarNuevoAnio() {
-            if(confirm("¿Estás seguro de generar un nuevo cuadrante anual rotativo?")) {
-                guardiasSemanas = {};
-                let d = new Date(currentYear, 0, 1);
-                while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
-                let indices = Array.from(Array(tecnicos.length).keys());
-                indices.sort(() => Math.random() - 0.5);
-                let i = 0;
-                while (d.getFullYear() === currentYear) {
-                    const fechaStr = d.toISOString().split('T')[0];
-                    guardiasSemanas[fechaStr] = tecnicos[indices[i % indices.length]].name;
-                    i++;
-                    d.setDate(d.getDate() + 7);
+        // GENERADOR INTELIGENTE: Compensa festivos acumulados y equilibra semanas
+        function generarNuevoAnio(esSilencioso = false) {
+            if (!esSilencioso && !confirm("¿Generar un nuevo cuadrante anual equilibrando automáticamente la carga y los festivos entre técnicos?")) {
+                return;
+            }
+
+            guardiasSemanas = {};
+            
+            // Contadores de control para la equidad anual
+            let semanasAsignadas = {};
+            let festivosAsignados = {};
+            tecnicos.forEach(t => {
+                semanasAsignadas[t.name] = 0;
+                festivosAsignados[t.name] = 0;
+            });
+
+            // Recorrer todas las semanas del año (de viernes a viernes)
+            let d = new Date(currentYear, 0, 1);
+            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
+
+            let listadoSemanas = [];
+            while (d.getFullYear() === currentYear) {
+                let fechaStr = d.toISOString().split('T')[0];
+                
+                // Contar cuántos días festivos (no fin de semana ordinario) caen en esta semana de guardia
+                let countFestivosSemana = 0;
+                let dCalc = new Date(d);
+                for (let i = 0; i < 7; i++) {
+                    let fList = getFestivosDelDia(dCalc.getMonth(), dCalc.getDate());
+                    // Si tiene algún festivo oficial (nac, aut, loc)
+                    if (fList.some(f => f.type !== 'fin')) {
+                        countFestivosSemana++;
+                    }
+                    dCalc.setDate(dCalc.getDate() + 1);
                 }
-                renderApp();
-                showToast("🎲 ¡Nuevo cuadrante anual generado!");
+
+                listadoSemanas.push({ fechaStr: fechaStr, festivosCount: countFestivosSemana });
+                d.setDate(d.getDate() + 7);
+            }
+
+            // Ordenar las semanas del año priorizando aquellas que tienen más festivos 
+            // para repartirlas primero de forma justa entre los técnicos que menos lleven.
+            listadoSemanas.sort((a, b) => b.festivosCount - a.festivosCount);
+
+            // Asignación inteligente semana a semana
+            listadoSemanas.forEach(semana => {
+                // Ordenar técnicos: 
+                // 1º Prioridad: El que menos festivos acumulados lleve.
+                // 2º Prioridad: El que menos semanas totales tenga asignadas (para nivelar carga general).
+                let tecnicosOrdenados = [...tecnicos].sort((a, b) => {
+                    if (festivosAsignados[a.name] !== festivosAsignados[b.name]) {
+                        return festivosAsignados[a.name] - festivosAsignados[b.name];
+                    }
+                    return semanasAsignadas[a.name] - semanasAsignadas[b.name];
+                });
+
+                let elegido = tecnicosOrdenados[0].name;
+
+                guardiasSemanas[semana.fechaStr] = elegido;
+                semanasAsignadas[elegido]++;
+                festivosAsignados[elegido] += semana.festivosCount;
+            });
+
+            renderApp();
+            if (!esSilencioso) {
+                showToast("🎲 ¡Cuadrante anual generado y equilibrado en festivos!");
             }
         }
 
@@ -589,7 +630,6 @@
             });
         }
 
-        // SALDOS CON CÁLCULO AUTOMÁTICO Y CAMPOS MANUALES EDITABLES
         function renderVacationBalances() {
             const container = document.getElementById('vacation-balance-list');
             container.innerHTML = '';
@@ -683,7 +723,6 @@
                 let itemClass = 'tech-mgmt-item';
                 let statusBadge = '';
 
-                // Animaciones separadas para Vacaciones, Asuntos Propios o Guardia Hoy
                 if (currentAbsence === 'vacation') {
                     itemClass += ' on-vacation';
                     statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones Hoy</span>';
