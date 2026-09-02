@@ -6,6 +6,8 @@
     <title>Gestión de Guardias y Vacaciones - Técnicos</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -22,6 +24,8 @@
             --success: #10b981;
             --warning: #f59e0b;
             --info: #3b82f6;
+            --whatsapp: #25d366;
+            --pdf-color: #ef4444;
         }
 
         [data-theme="dark"] {
@@ -49,6 +53,12 @@
         .btn-danger { background: #fee2e2; color: #b91c1c; }
         [data-theme="dark"] .btn-danger { background: #7f1d1d; color: #fecaca; }
         .btn-danger:hover { opacity: 0.9; }
+
+        .btn-whatsapp { background-color: var(--whatsapp); color: white; }
+        .btn-whatsapp:hover { background-color: #20ba5a; transform: translateY(-1px); }
+
+        .btn-pdf { background-color: var(--pdf-color); color: white; }
+        .btn-pdf:hover { background-color: #dc2626; transform: translateY(-1px); }
 
         .btn-info-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--text-muted); font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: var(--transition); }
         .btn-info-icon:hover { background: #3b82f6; color: white; }
@@ -166,6 +176,38 @@
         .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: var(--radius-md); font-size: 0.9rem; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
         .hidden { display: none !important; }
+
+        /* ESTILOS ESPECÍFICOS PARA IMPRESIÓN / PIZARRA */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 10px;
+            }
+            header, .sidebar, .header-actions, .btn, .calendar-card, #toast, .modal-overlay {
+                display: none !important;
+            }
+            .print-only-container {
+                display: block !important;
+                width: 100%;
+            }
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 10px;
+                text-align: left;
+                font-size: 14px;
+            }
+            .print-table th {
+                background-color: #eee !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+        .print-only-container { display: none; }
     </style>
 </head>
 <body>
@@ -212,7 +254,11 @@
                 <div class="card sidebar-card">
                     <h3>
                         🌴 Vacaciones y Ausencias
-                        <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="openAddAbsenceModal()">+ Registrar</button>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn btn-whatsapp" style="padding: 4px 8px; font-size: 0.75rem;" onclick="enviarWhatsAppVacaciones()" title="Enviar resumen por WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+                            <button class="btn btn-pdf" style="padding: 4px 8px; font-size: 0.75rem;" onclick="exportarPDFVacaciones()" title="Imprimir para Pizarra / PDF"><i class="fa-solid fa-print"></i></button>
+                            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="openAddAbsenceModal()">+ Registrar</button>
+                        </div>
                     </h3>
                     <div class="absences-sidebar-list" id="absences-sidebar-list"></div>
                 </div>
@@ -239,6 +285,26 @@
                 </div>
             </aside>
         </div>
+    </div>
+
+    <!-- Contenedor exclusivo para impresión optimizada en pizarra -->
+    <div class="print-only-container" id="print-container">
+        <h2 style="text-align: center; margin-bottom: 5px;">CONTROL DE VACACIONES - TÉCNICOS</h2>
+        <p style="text-align: center; margin-bottom: 20px; font-size: 12px; color: #555;">Listado oficial para tablón de anuncios / Pizarra</p>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th>Nombre del Técnico</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Días Disfrutados</th>
+                    <th>Días Restantes</th>
+                </tr>
+            </thead>
+            <tbody id="print-table-body">
+                <!-- Se llena dinámicamente -->
+            </tbody>
+        </table>
     </div>
 
     <div id="toast">¡Actualizado con éxito!</div>
@@ -761,6 +827,78 @@
                 `;
                 container.appendChild(item);
             });
+        }
+
+        function calcularResumenVacacionesArray() {
+            let resultado = [];
+            tecnicos.forEach(t => {
+                if (!vacacionesData[t.name]) {
+                    vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                }
+
+                let diasCalendario = 0;
+                let listaPeriodos = [];
+                ausencias.forEach(abs => {
+                    if (abs.techName === t.name && abs.type === 'vacation') {
+                        let start = new Date(abs.start);
+                        let end = new Date(abs.end);
+                        let diffTime = Math.abs(end - start);
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        diasCalendario += diffDays;
+                        listaPeriodos.push(`Del ${abs.start.split('-').reverse().join('/')} al ${abs.end.split('-').reverse().join('/')}`);
+                    }
+                });
+
+                let data = vacacionesData[t.name];
+                let totalDisfrutados = diasCalendario + Number(data.extraDisfrutados);
+                let diasRestantes = 31 - totalDisfrutados + Number(data.ajusteManual);
+
+                resultado.push({
+                    name: t.name,
+                    periodos: listaPeriodos.length > 0 ? listaPeriodos.join(', ') : 'Sin definir',
+                    disfrutados: totalDisfrutados,
+                    restantes: diasRestantes
+                });
+            });
+            return resultado;
+        }
+
+        // Función para enviar resumen de vacaciones por WhatsApp
+        function enviarWhatsAppVacaciones() {
+            let resumen = calcularResumenVacacionesArray();
+            let mensaje = "🌴 *RESUMEN DE VACACIONES - TÉCNICOS* 🌴\n\n";
+
+            resumen.forEach(item => {
+                mensaje += `👤 *${item.name}*\n`;
+                mensaje += `📅 Fechas: ${item.periodos}\n`;
+                mensaje += `🏖️ Disfrutados: ${item.disfrutados} días\n`;
+                mensaje += `⏳ Restantes: ${item.restantes} días\n`;
+                mensaje += `-----------------------------------\n`;
+            });
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        // Función para exportar a PDF / Imprimir para la Pizarra
+        function exportarPDFVacaciones() {
+            let resumen = calcularResumenVacacionesArray();
+            let tbody = document.getElementById('print-table-body');
+            tbody.innerHTML = '';
+
+            resumen.forEach(item => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.periodos}</td>
+                    <td>-</td>
+                    <td><strong>${item.disfrutados} días</strong></td>
+                    <td><strong>${item.restantes} días</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            window.print();
         }
 
         function renderVacationBalances() {
