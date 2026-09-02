@@ -47,6 +47,10 @@
         .btn-danger { background: #fee2e2; color: #b91c1c; }
         [data-theme="dark"] .btn-danger { background: #7f1d1d; color: #fecaca; }
         .btn-danger:hover { opacity: 0.9; }
+
+        /* Botón de Información Estilo Circular (i) */
+        .btn-info-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--text-muted); font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: var(--transition); }
+        .btn-info-icon:hover { background: #3b82f6; color: white; }
         
         .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
 
@@ -217,7 +221,12 @@
                 </div>
 
                 <div class="card sidebar-card">
-                    <h3>⚙️ Gestión y Estado de Técnicos</h3>
+                    <h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ⚙️ Gestión y Estado de Técnicos
+                        </div>
+                        <button class="btn-info-icon" onclick="openTechInfoModal()" title="Ayuda e información de indicadores">i</button>
+                    </h3>
                     <div class="tech-mgmt-list" id="tech-mgmt-list"></div>
                     <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openAddTechModal()">+ Añadir Técnico</button>
                 </div>
@@ -287,6 +296,27 @@
         </div>
     </div>
 
+    <!-- Modal de Información / Ayuda de la App -->
+    <div class="modal-overlay" id="info-modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>ℹ️ Guía del Panel de Técnicos</h3>
+                <button class="btn btn-secondary" onclick="closeTechInfoModal()" style="padding: 4px 8px;">✕</button>
+            </div>
+            <div class="modal-body" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
+                <p>Esta sección resume la disponibilidad actual y el reparto de carga de trabajo de cada técnico:</p>
+                <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <li><strong style="color: var(--text-main);">Estado Activo:</strong> Muestra alertas animadas si el operario se encuentra hoy <span style="color:#10b981; font-weight:600;">de vacaciones</span>, disfrutando de <span style="color:#f59e0b; font-weight:600;">asuntos propios</span> o cubriendo la <span style="color:#3b82f6; font-weight:600;">guardia de la semana</span>.</li>
+                    <li><strong style="color: var(--text-main);">Carga Anual:</strong> Indica las semanas totales asignadas y el porcentaje que representan sobre el total del año.</li>
+                    <li><strong style="color: var(--text-main);">Botón Editar:</strong> Permite cambiar el nombre o el color identificativo del trabajador en los calendarios.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeTechInfoModal()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentYear = 2026;
         let currentMonth = 8; // Septiembre
@@ -306,6 +336,13 @@
         ];
 
         let vacacionesData = {};
+
+        // Histórico simulado de festivos del año anterior (clave: 'mes-dia' o identificador único del festivo -> nombre del técnico que lo hizo)
+        let historicoFestivosAnioAnterior = {
+            "0-1": "J.Carlos",   // Año Nuevo
+            "4-1": "Lucas",     // 1 de Mayo
+            "7-15": "Óscar Ibarreta" // Asunción
+        };
 
         const festivosOficiales = {
             "0-1": [{type: "nac", label: "Año Nuevo"}],
@@ -389,15 +426,15 @@
             generarNuevoAnio(true);
         }
 
-        // GENERADOR INTELIGENTE: Compensa festivos acumulados y equilibra semanas
+        // GENERADOR INTELIGENTE CON CONFIRMACIÓN Y ROTACIÓN ESTRICTA DE FESTIVOS DEL AÑO ANTERIOR
         function generarNuevoAnio(esSilencioso = false) {
-            if (!esSilencioso && !confirm("¿Generar un nuevo cuadrante anual equilibrando automáticamente la carga y los festivos entre técnicos?")) {
-                return;
+            if (!esSilencioso) {
+                const confirmar = confirm("⚠️ ¿Estás seguro de que deseas generar un nuevo cuadrante anual?\n\nEsto recalculará todas las semanas y redistribuirá los festivos evitando que repita el mismo técnico que los hizo el año anterior.");
+                if (!confirmar) return;
             }
 
             guardiasSemanas = {};
             
-            // Contadores de control para la equidad anual
             let semanasAsignadas = {};
             let festivosAsignados = {};
             tecnicos.forEach(t => {
@@ -405,7 +442,6 @@
                 festivosAsignados[t.name] = 0;
             });
 
-            // Recorrer todas las semanas del año (de viernes a viernes)
             let d = new Date(currentYear, 0, 1);
             while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
 
@@ -413,32 +449,43 @@
             while (d.getFullYear() === currentYear) {
                 let fechaStr = d.toISOString().split('T')[0];
                 
-                // Contar cuántos días festivos (no fin de semana ordinario) caen en esta semana de guardia
                 let countFestivosSemana = 0;
+                let clavesFestivosEnSemana = [];
                 let dCalc = new Date(d);
                 for (let i = 0; i < 7; i++) {
-                    let fList = getFestivosDelDia(dCalc.getMonth(), dCalc.getDate());
-                    // Si tiene algún festivo oficial (nac, aut, loc)
+                    let m = dCalc.getMonth();
+                    let dayNum = dCalc.getDate();
+                    let key = `${m}-${dayNum}`;
+                    let fList = getFestivosDelDia(m, dayNum);
                     if (fList.some(f => f.type !== 'fin')) {
                         countFestivosSemana++;
+                        clavesFestivosEnSemana.push(key);
                     }
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
 
-                listadoSemanas.push({ fechaStr: fechaStr, festivosCount: countFestivosSemana });
+                listadoSemanas.push({ 
+                    fechaStr: fechaStr, 
+                    festivosCount: countFestivosSemana,
+                    clavesFestivos: clavesFestivosEnSemana
+                });
                 d.setDate(d.getDate() + 7);
             }
 
-            // Ordenar las semanas del año priorizando aquellas que tienen más festivos 
-            // para repartirlas primero de forma justa entre los técnicos que menos lleven.
+            // Ordenar semanas priorizando las de mayor cantidad de festivos
             listadoSemanas.sort((a, b) => b.festivosCount - a.festivosCount);
 
-            // Asignación inteligente semana a semana
             listadoSemanas.forEach(semana => {
-                // Ordenar técnicos: 
-                // 1º Prioridad: El que menos festivos acumulados lleve.
-                // 2º Prioridad: El que menos semanas totales tenga asignadas (para nivelar carga general).
+                // Filtrar o penalizar técnicos que hicieron exactamente ese mismo festivo el año pasado
                 let tecnicosOrdenados = [...tecnicos].sort((a, b) => {
+                    // Verificar si alguno hizo los festivos de esta semana el año pasado
+                    let hizoFestivoAnioPasadoA = semana.clavesFestivos.some(k => historicoFestivosAnioAnterior[k] === a.name);
+                    let hizoFestivoAnioPasadoB = semana.clavesFestivos.some(k => historicoFestivosAnioAnterior[k] === b.name);
+
+                    if (hizoFestivoAnioPasadoA !== hizoFestivoAnioPasadoB) {
+                        return hizoFestivoAnioPasadoA ? 1 : -1; // Prioriza al que NO lo hizo el año pasado
+                    }
+
                     if (festivosAsignados[a.name] !== festivosAsignados[b.name]) {
                         return festivosAsignados[a.name] - festivosAsignados[b.name];
                     }
@@ -450,11 +497,16 @@
                 guardiasSemanas[semana.fechaStr] = elegido;
                 semanasAsignadas[elegido]++;
                 festivosAsignados[elegido] += semana.festivosCount;
+
+                // Actualizar simulación de histórico para futuros años si se desea
+                semana.clavesFestivos.forEach(k => {
+                    historicoFestivosAnioAnterior[k] = elegido;
+                });
             });
 
             renderApp();
             if (!esSilencioso) {
-                showToast("🎲 ¡Cuadrante anual generado y equilibrado en festivos!");
+                showToast("🎲 ¡Cuadrante anual generado rotando festivos con éxito!");
             }
         }
 
@@ -755,6 +807,14 @@
                 `;
                 container.appendChild(item);
             });
+        }
+
+        function openTechInfoModal() {
+            document.getElementById('info-modal-overlay').style.display = 'flex';
+        }
+
+        function closeTechInfoModal() {
+            document.getElementById('info-modal-overlay').style.display = 'none';
         }
 
         function openAddTechModal() {
