@@ -40,21 +40,25 @@
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
         
         .calendar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow-x: auto; }
+        
+        .calendar-legend { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
         
         .cal-header { text-align: center; font-weight: 700; font-size: 0.85rem; color: var(--text-muted); padding: 12px 5px; background: var(--bg-app); }
-        .cal-cell { background: var(--bg-card); min-height: 120px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .cal-cell.other-month { background: #f9fafb; opacity: 0.5; }
+        .cal-cell { background: var(--bg-card); min-height: 125px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .cal-cell.other-month { background: #f9fafb; opacity: 0.4; }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
         .day-num { font-weight: 700; font-size: 1.1rem; line-height: 1; }
         .cal-cell.is-festivo .day-num { color: #dc2626; }
         
-        .fest-icons { display: flex; gap: 3px; }
-        .fest-icon { font-size: 0.6rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; }
-        .fest-nac { background-color: #dc2626; }
-        .fest-aut { background-color: #ea580c; }
-        .fest-loc { background-color: #9333ea; }
+        .fest-icons { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; max-width: 70px; }
+        .fest-icon { font-size: 0.55rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; white-space: nowrap; }
+        .fest-nac { background-color: #dc2626; } /* España */
+        .fest-aut { background-color: #ea580c; } /* C. Valenciana */
+        .fest-loc { background-color: #9333ea; } /* Local Valencia */
 
         .guardia-banner { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; text-align: center; margin: 6px 0; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -68,7 +72,7 @@
         .sidebar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         .sidebar-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
-        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 5px; }
         .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; background: #fafafa; }
         .weekly-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         .weekly-details { display: flex; justify-content: space-between; align-items: center; }
@@ -109,6 +113,11 @@
         <div class="dashboard-grid">
             <div class="card calendar-card">
                 <h2>🗓️ Calendario Mensual</h2>
+                <div class="calendar-legend">
+                    <div class="legend-item"><span class="fest-icon fest-nac">NAC</span> Nacional</div>
+                    <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> C. Valenciana</div>
+                    <div class="legend-item"><span class="fest-icon fest-loc">LOC</span> Local Valencia</div>
+                </div>
                 <div class="calendar-grid" id="calendar-grid-container">
                     <div class="cal-header">Lun</div>
                     <div class="cal-header">Mar</div>
@@ -161,7 +170,6 @@
     </div>
 
     <script>
-        // Configuración inicial y datos
         let currentYear = 2026;
         let currentMonth = 0; // Enero
 
@@ -174,45 +182,42 @@
             { name: "Óscar Ibañez", color: "#3b82f6" }
         ];
 
-        // Festivos fijos y específicos (Mes 0-indexed, Día)
-        // Nacionales (nac), Comunidad Valenciana (aut), Local Valencia (loc)
-        const festivosFijos = {
+        // Festivos Oficiales (Formato clave "mes-dia", mes 0-indexed)
+        const festivosOficiales = {
             "0-1": [{type: "nac", label: "Año Nuevo"}],
-            "0-6": [{type: "nac", label: "Reyes"}],
-            "2-19": [{type: "loc", label: "San José"}],
-            "3-3": [{type: "aut", label: "San Vicente"}], // Aprox según imagen
-            "4-1": [{type: "nac", label: "Trabajador"}],
+            "0-6": [{type: "nac", label: "Epifanía del Señor"}],
+            "2-19": [{type: "loc", label: "San José (Local Valencia)"}],
+            "2-27": [{type: "loc", label: "Puente Fallas Local"}], // Ajustado según tu imagen
+            "3-3": [{type: "aut", label: "San Vicente Ferrer"}],
+            "3-6": [{type: "loc", label: "Local Valencia"}],
+            "4-1": [{type: "nac", label: "Fiesta del Trabajo"}],
             "5-24": [{type: "aut", label: "San Juan"}],
-            "7-15": [{type: "nac", label: "Asunción"}],
-            "9-9": [{type: "aut", label: "C. Valenciana"}],
-            "9-12": [{type: "nac", label: "Fiesta Nacional"}],
+            "7-15": [{type: "nac", label: "Asunción de la Virgen"}],
+            "9-9": [{type: "aut", label: "Día de la Comunitat Valenciana"}],
+            "9-12": [{type: "nac", label: "Fiesta Nacional de España"}],
             "10-1": [{type: "nac", label: "Todos los Santos"}],
-            "11-6": [{type: "nac", label: "Constitución"}],
-            "11-8": [{type: "nac", label: "Inmaculada"}],
-            "11-25": [{type: "nac", label: "Navidad"}],
-            "11-31": [{type: "loc", label: "Festivo Local"}],
-            "2-27": [{type: "loc", label: "Falla/Local"}],
-            "3-6": [{type: "loc", label: "Local"}],
-            "11-4": [{type: "loc", label: "Local"}]
+            "11-4": [{type: "loc", label: "Local Valencia"}],
+            "11-6": [{type: "nac", label: "Día de la Constitución"}],
+            "11-8": [{type: "nac", label: "Inmaculada Concepción"}],
+            "11-25": [{type: "nac", label: "Natividad del Señor"}],
+            "11-31": [{type: "loc", label: "Festivo Local Fin de Año"}],
         };
 
-        // Almacén de asignaciones de guardias por semana (clave: 'YYYY-MM-DD' del viernes de inicio)
         let guardiasSemanas = {};
 
-        function getFestivosDelDia(year, month, day) {
-            const date = new Date(year, month, day);
-            const dayOfWeek = date.getDay(); // 0 Dom, 6 Sáb
+        function getFestivosDelDia(month, day) {
             let festivos = [];
-
-            // Sábados y Domingos siempre festivos de 70€
+            // Fines de semana (Sábados y Domingos)
+            const date = new Date(currentYear, month, day);
+            const dayOfWeek = date.getDay();
             if (dayOfWeek === 0 || dayOfWeek === 6) {
                 festivos.push({ type: "fin", label: "Fin de semana" });
             }
 
             // Festivos específicos calendarizados
             const key = `${month}-${day}`;
-            if (festivosFijos[key]) {
-                festivos = festivos.concat(festivosFijos[key]);
+            if (festivosOficiales[key]) {
+                festivos = festivos.concat(festivosOficiales[key]);
             }
             return festivos;
         }
@@ -223,32 +228,27 @@
         }
 
         function generarCuadranteAnualAutomatico() {
-            if (Object.keys(guardiasSemanas).length > 0) return; // Si ya existen, no sobrescribir
+            if (Object.keys(guardiasSemanas).length > 0) return;
             
-            // Empezar desde el primer viernes del año o cercano
             let d = new Date(currentYear, 0, 1);
-            while (d.getDay() !== 5) { // 5 = Viernes
-                d.setDate(d.getDate() + 1);
-            }
+            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
 
             let techIndex = 0;
             while (d.getFullYear() === currentYear) {
                 const fechaStr = d.toISOString().split('T')[0];
                 guardiasSemanas[fechaStr] = tecnicos[techIndex % tecnicos.length].name;
-                
                 techIndex++;
-                d.setDate(d.getDate() + 7); // Siguiente viernes
+                d.setDate(d.getDate() + 7);
             }
         }
 
         function generarNuevoAnio() {
-            if(confirm("¿Estás seguro de generar un nuevo cuadrante aleatorio rotando los técnicos?")) {
+            if(confirm("¿Estás seguro de generar un nuevo cuadrante aleatorio rotando los técnicos para todo el año?")) {
                 guardiasSemanas = {};
                 let d = new Date(currentYear, 0, 1);
                 while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
 
                 let indices = Array.from(Array(tecnicos.length).keys());
-                // Mezcla aleatoria justa
                 indices.sort(() => Math.random() - 0.5);
                 let i = 0;
 
@@ -271,7 +271,6 @@
 
         function renderCalendar() {
             const container = document.getElementById('calendar-grid-container');
-            // Mantener cabeceras
             container.innerHTML = `
                 <div class="cal-header">Lun</div>
                 <div class="cal-header">Mar</div>
@@ -286,7 +285,6 @@
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
-            // Rellenar días del mes anterior
             for (let i = firstDayIndex - 1; i >= 0; i--) {
                 const dayNum = prevMonthDays - i;
                 const cell = document.createElement('div');
@@ -295,24 +293,21 @@
                 container.appendChild(cell);
             }
 
-            // Días del mes actual
             for (let day = 1; day <= totalDays; day++) {
                 const cell = document.createElement('div');
-                const festivos = getFestivosDelDia(currentMonth, day); // Nota: corregido orden en llamadas internas si procede
+                const festivos = getFestivosDelDia(currentMonth, day);
                 const isFestivo = festivos.length > 0;
 
                 cell.className = `cal-cell ${isFestivo ? 'is-festivo' : ''}`;
 
-                // Averiguar qué técnico está de guardia este día buscando el viernes de su semana correspondiente
                 let fechaActualObj = new Date(currentYear, currentMonth, day);
                 let tecnicoGuardia = "";
                 let colorTecnico = "#cbd5e1";
 
-                // Buscar el viernes de inicio de esta semana (o anterior)
                 for (let k = 0; k < 7; k++) {
                     let dCheck = new Date(fechaActualObj);
                     dCheck.setDate(dCheck.getDate() - k);
-                    if (dCheck.getDay() === 5) { // Viernes
+                    if (dCheck.getDay() === 5) {
                         let fStr = dCheck.toISOString().split('T')[0];
                         if (guardiasSemanas[fStr]) {
                             tecnicoGuardia = guardiasSemanas[fStr];
@@ -339,7 +334,7 @@
                     ${tecnicoGuardia ? `<div class="guardia-banner" style="background-color: ${colorTecnico}33; color: ${colorTecnico}; border: 1px solid ${colorTecnico}">${tecnicoGuardia.split(' ')[0]}</div>` : ''}
                     <div class="day-rates">
                         <div class="rate-row lab"><span>Laboral</span><span class="rate-val">28€</span></div>
-                        <div class="rate-row fes"><span>Festivo/Fines</span><span class="rate-val">70€</span></div>
+                        <div class="rate-row fes"><span>Festivo</span><span class="rate-val">70€</span></div>
                     </div>
                 `;
                 container.appendChild(cell);
@@ -350,9 +345,8 @@
             const container = document.getElementById('weekly-summary');
             container.innerHTML = '';
 
-            // Listar semanas de viernes a viernes que intersectan con el mes actual
             let d = new Date(currentYear, currentMonth, 1);
-            while (d.getDay() !== 5) { d.setDate(d.getDate() - 1); } // Retroceder al primer viernes
+            while (d.getDay() !== 5) { d.setDate(d.getDate() - 1); }
 
             let finMes = new Date(currentYear, currentMonth + 1, 0);
 
@@ -363,15 +357,15 @@
                 let fechaFin = new Date(d);
                 fechaFin.setDate(fechaFin.getDate() + 7);
 
-                // Calcular importe de la semana (7 días: desde viernes hasta el siguiente viernes)
+                // Cálculo económico exacto de la semana (evaluando si cada día es festivo nacional, autonómico, local o finde)
                 let totalSemana = 0;
                 let dCalc = new Date(d);
-                for(let i=0; i<7; i++) {
+                for(let i = 0; i < 7; i++) {
                     let festivosDia = getFestivosDelDia(dCalc.getMonth(), dCalc.getDate());
                     if (festivosDia.length > 0) {
-                        totalSemana += 70; // Festivo o fin de semana
+                        totalSemana += 70; // Festivo / Finde
                     } else {
-                        totalSemana += 28; // Laboral
+                        totalSemana += 28; // Laboral normal
                     }
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
@@ -489,7 +483,6 @@
             renderApp();
         }
 
-        // Ejecutar inicialización
         initApp();
     </script>
 </body>
