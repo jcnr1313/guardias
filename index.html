@@ -19,6 +19,7 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --success: #10b981;
             --warning: #f59e0b;
+            --info: #3b82f6;
         }
 
         [data-theme="dark"] {
@@ -100,7 +101,7 @@
         .tech-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .weekly-pay { font-weight: 800; font-size: 1.05rem; color: #16a34a; }
 
-        /* Animaciones y Destacados de Vacaciones Activas */
+        /* Animaciones para Vacaciones y Guardias Activas */
         @keyframes pulse-vacation {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); border-color: var(--success); }
             70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); border-color: var(--success); }
@@ -113,10 +114,17 @@
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); border-color: var(--warning); }
         }
 
+        @keyframes pulse-guardia {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); border-color: var(--info); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); border-color: var(--info); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); border-color: var(--info); }
+        }
+
         .tech-mgmt-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 15px; }
         .tech-mgmt-item { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); transition: all 0.3s ease; }
         .tech-mgmt-item.on-vacation { animation: pulse-vacation 2s infinite; border-width: 2px; background-color: rgba(16, 185, 129, 0.08); }
         .tech-mgmt-item.on-personal { animation: pulse-personal 2s infinite; border-width: 2px; background-color: rgba(245, 158, 11, 0.08); }
+        .tech-mgmt-item.on-guardia { animation: pulse-guardia 2s infinite; border-width: 2px; background-color: rgba(59, 130, 246, 0.08); }
 
         .tech-mgmt-row { display: flex; justify-content: space-between; align-items: center; }
         .tech-mgmt-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
@@ -126,15 +134,17 @@
         .badge-absence { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
         .badge-vacation { background: #10b981; color: white; }
         .badge-personal { background: #f59e0b; color: white; }
+        .badge-guardia { background: #3b82f6; color: white; }
 
         .absences-sidebar-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
         .absence-sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-app); border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.8rem; }
 
-        /* Control de Saldos de Vacaciones */
-        .vacation-balance-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
+        /* Control de Saldos con Ajustes Manuales */
+        .vacation-balance-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; margin-bottom: 15px; }
         .vacation-balance-item { background: var(--bg-app); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
         .vacation-balance-row { display: flex; justify-content: space-between; align-items: center; }
-        .vacation-stats-pill { display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); justify-content: space-between; }
+        .vacation-inputs-row { display: flex; gap: 6px; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-card); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
+        .vacation-inputs-row input { width: 40px; padding: 2px; text-align: center; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main); border-radius: 4px; font-weight: 600; }
 
         #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #toast.show { transform: translateY(0); opacity: 1; }
@@ -200,9 +210,9 @@
                     <div class="absences-sidebar-list" id="absences-sidebar-list"></div>
                 </div>
 
-                <!-- CONTADOR AUTOMÁTICO DE VACACIONES (DISFRUTADAS VS RESTANTES) -->
+                <!-- SALDOS DE VACACIONES CON MODIFICACIÓN MANUAL -->
                 <div class="card sidebar-card">
-                    <h3>🏖️ Saldos de Vacaciones (Base: 31)</h3>
+                    <h3>🏖️ Control de Saldos (Base: 31)</h3>
                     <div class="vacation-balance-list" id="vacation-balance-list"></div>
                 </div>
 
@@ -279,7 +289,7 @@
 
     <script>
         let currentYear = 2026;
-        let currentMonth = 8; // Septiembre por defecto para visualizar datos iniciales
+        let currentMonth = 8; // Septiembre
 
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -294,6 +304,9 @@
             { id: 1, techName: "J.Carlos", type: "vacation", start: "2026-09-01", end: "2026-09-10" },
             { id: 2, techName: "Lucas", type: "personal", start: "2026-09-03", end: "2026-09-05" }
         ];
+
+        // Almacena ajustes manuales extras por técnico (ej: { "J.Carlos": { extraDisfrutados: 2, ajusteManual: 0 } })
+        let vacacionesData = {};
 
         const festivosOficiales = {
             "0-1": [{type: "nac", label: "Año Nuevo"}],
@@ -349,6 +362,22 @@
                 }
             }
             return null;
+        }
+
+        function getGuardiaForTechToday(techName, dateStr) {
+            let dCheck = new Date(dateStr);
+            for (let k = 0; k < 7; k++) {
+                let dTemp = new Date(dCheck);
+                dTemp.setDate(dTemp.getDate() - k);
+                if (dTemp.getDay() === 5) {
+                    let fStr = dTemp.toISOString().split('T')[0];
+                    if (guardiasSemanas[fStr] === techName) {
+                        return true;
+                    }
+                    break;
+                }
+            }
+            return false;
         }
 
         function initApp() {
@@ -560,24 +589,30 @@
             });
         }
 
-        // CÁLCULO AUTOMÁTICO DE VACACIONES (31 DÍAS - DISFRUTADAS)
+        // SALDOS CON CÁLCULO AUTOMÁTICO Y CAMPOS MANUALES EDITABLES
         function renderVacationBalances() {
             const container = document.getElementById('vacation-balance-list');
             container.innerHTML = '';
 
             tecnicos.forEach(t => {
-                let diasDisfrutados = 0;
+                if (!vacacionesData[t.name]) {
+                    vacacionesData[t.name] = { extraDisfrutados: 0, ajusteManual: 0 };
+                }
+
+                let diasCalendario = 0;
                 ausencias.forEach(abs => {
                     if (abs.techName === t.name && abs.type === 'vacation') {
                         let start = new Date(abs.start);
                         let end = new Date(abs.end);
                         let diffTime = Math.abs(end - start);
                         let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                        diasDisfrutados += diffDays;
+                        diasCalendario += diffDays;
                     }
                 });
 
-                let diasRestantes = 31 - diasDisfrutados;
+                let data = vacacionesData[t.name];
+                let totalDisfrutados = diasCalendario + Number(data.extraDisfrutados);
+                let diasRestantes = 31 - totalDisfrutados + Number(data.ajusteManual);
 
                 const item = document.createElement('div');
                 item.className = 'vacation-balance-item';
@@ -589,13 +624,28 @@
                         </div>
                         <span style="font-weight: 800; font-size: 0.95rem; color: ${diasRestantes < 0 ? '#ef4444' : '#10b981'};">${diasRestantes} días libres</span>
                     </div>
-                    <div class="vacation-stats-pill">
-                        <span>Total base: <b>31</b></span>
-                        <span>Disfrutados: <b style="color:var(--text-main);">${diasDisfrutados}</b></span>
+                    <div class="vacation-inputs-row">
+                        <span>Auto: <b>${diasCalendario}</b></span>
+                        <span>Extra: <input type="number" value="${data.extraDisfrutados}" onchange="actualizarExtraDisfrutados('${t.name}', this.value)" title="Sumar días disfrutados externamente"></span>
+                        <span>Ajuste(+/-): <input type="number" value="${data.ajusteManual}" onchange="actualizarAjusteManual('${t.name}', this.value)" title="Ajuste manual de saldo"></span>
                     </div>
                 `;
                 container.appendChild(item);
             });
+        }
+
+        function actualizarExtraDisfrutados(techName, val) {
+            if (!vacacionesData[techName]) vacacionesData[techName] = { extraDisfrutados: 0, ajusteManual: 0 };
+            vacacionesData[techName].extraDisfrutados = parseInt(val) || 0;
+            renderVacationBalances();
+            showToast("🌴 Días extra actualizados");
+        }
+
+        function actualizarAjusteManual(techName, val) {
+            if (!vacacionesData[techName]) vacacionesData[techName] = { extraDisfrutados: 0, ajusteManual: 0 };
+            vacacionesData[techName].ajusteManual = parseInt(val) || 0;
+            renderVacationBalances();
+            showToast("⚙️ Ajuste de saldo actualizado");
         }
 
         function cambiarTecnicoSemana(fechaStr, nuevoTecnico) {
@@ -628,16 +678,21 @@
                 let porcentaje = totalWeeksAssigned > 0 ? Math.round((assignedCount / totalWeeksAssigned) * 100) : 0;
 
                 let currentAbsence = getActiveAbsenceForTech(t.name, todayStr);
+                let isGuardiaToday = getGuardiaForTechToday(t.name, todayStr);
+
                 let itemClass = 'tech-mgmt-item';
                 let statusBadge = '';
 
-                // Animación y cuadro destacado si están de vacaciones hoy
+                // Animaciones separadas para Vacaciones, Asuntos Propios o Guardia Hoy
                 if (currentAbsence === 'vacation') {
                     itemClass += ' on-vacation';
                     statusBadge = '<span class="badge-absence badge-vacation">🌴 De Vacaciones Hoy</span>';
                 } else if (currentAbsence === 'personal') {
                     itemClass += ' on-personal';
                     statusBadge = '<span class="badge-absence badge-personal">☕ Asuntos Propios Hoy</span>';
+                } else if (isGuardiaToday) {
+                    itemClass += ' on-guardia';
+                    statusBadge = '<span class="badge-absence badge-guardia">🚨 De Guardia Esta Semana</span>';
                 }
 
                 const item = document.createElement('div');
