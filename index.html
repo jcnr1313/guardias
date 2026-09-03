@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="stark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Guardias • Órbita Pro</title>
+    <title>Gestión de Guardias • HUD Command Center</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para iconos -->
@@ -11,39 +11,57 @@
     <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Temas HUD / Sci-Fi */
         :root {
-            --bg-app: #020617; --bg-card: rgba(15, 23, 42, 0.8); --text-main: #f8fafc; --text-muted: #94a3b8;
-            --border: rgba(51, 65, 85, 0.8); --radius-lg: 20px; --radius-md: 12px;
-            --shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5);
+            --bg-app: #020617; --bg-card: rgba(15, 23, 42, 0.85); --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border: rgba(51, 65, 85, 0.8); --accent: #3b82f6; --accent-glow: rgba(59, 130, 246, 0.4);
+            --radius-lg: 20px; --radius-md: 12px;
+            --shadow: 0 20px 25px -5px rgba(0,0,0,0.6), 0 8px 10px -6px rgba(0,0,0,0.6);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        [data-theme="cyberpunk"] {
+            --bg-app: #090014; --bg-card: rgba(24, 0, 46, 0.85); --text-main: #fff5fd; --text-muted: #d946ef;
+            --border: rgba(217, 70, 239, 0.4); --accent: #ec4899; --accent-glow: rgba(236, 72, 153, 0.6);
+        }
+        [data-theme="matrix"] {
+            --bg-app: #020d04; --bg-card: rgba(3, 26, 8, 0.85); --text-main: #f0fdf4; --text-muted: #4ade80;
+            --border: rgba(74, 222, 128, 0.4); --accent: #22c55e; --accent-glow: rgba(34, 197, 94, 0.6);
+        }
+        [data-theme="stark"] {
+            --bg-app: #030712; --bg-card: rgba(17, 24, 39, 0.85); --text-main: #f3f4f6; --text-muted: #9ca3af;
+            --border: rgba(55, 65, 81, 0.8); --accent: #06b6d4; --accent-glow: rgba(6, 182, 212, 0.5);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%); }
-        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
+        body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; position: relative; overflow-x: hidden; }
         
+        /* Efecto de Radar / Fondo Cibernético */
+        body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%); opacity: 0.15; pointer-events: none; z-index: -1; }
+
+        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
         .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
         
-        header { background: var(--bg-card); backdrop-blur: blur(16px); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
-        header h1 { font-size: 1.4rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; }
+        header { background: var(--bg-card); backdrop-filter: blur(16px); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 12px; }
         .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         
         .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; text-decoration: none;}
-        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
-        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 0 15px var(--accent-glow); }
+        .btn-primary:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
         .btn-danger:hover { transform: translateY(-1px); }
         .btn-secondary { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border); color: var(--text-main); backdrop-filter: blur(8px); }
-        .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: #64748b; }
+        .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: var(--accent); }
         
         .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
 
-        /* Banner de Guardia Activa Épico */
-        .active-guard-banner { background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9)); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; }
-        .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
+        /* Banner de Guardia Activa HUD */
+        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; }
+        .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
         .active-info { display: flex; align-items: center; gap: 15px; }
-        .active-avatar { width: 48px; height: 48px; border-radius: 14px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #60a5fa; }
+        .active-avatar { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-glow); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent); }
         
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
         @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
         
         .card { background: var(--bg-card); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
@@ -52,10 +70,10 @@
         .legend-item { display: flex; align-items: center; gap: 6px; }
         
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 3px; background: var(--border); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
-        .cal-header { text-align: center; font-weight: 700; font-size: 0.75rem; color: var(--text-muted); padding: 12px 4px; background: rgba(15, 23, 42, 0.95); text-transform: uppercase; letter-spacing: 0.05em; }
-        .cal-cell { background: rgba(15, 23, 42, 0.6); min-height: 110px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
-        .cal-cell:hover { background: rgba(30, 41, 59, 0.7); }
-        .cal-cell.other-month { background: rgba(15, 23, 42, 0.3); opacity: 0.35; }
+        .cal-header { text-align: center; font-weight: 700; font-size: 0.75rem; color: var(--text-muted); padding: 12px 4px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
+        .cal-cell { background: var(--bg-app); min-height: 110px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
+        .cal-cell:hover { background: rgba(255, 255, 255, 0.03); }
+        .cal-cell.other-month { opacity: 0.35; }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
         .day-num { font-weight: 700; font-size: 0.95rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
@@ -72,31 +90,37 @@
         .cal-cell.is-festivo .rate-row.fes { color: #f87171; font-weight: bold; }
         
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .sidebar-card h3 { font-size: 1.05rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; color: white; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .sidebar-card h3 { font-size: 1.05rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
-        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; padding-right: 4px; }
-        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(30, 41, 59, 0.4); }
+        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); }
         .weekly-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; font-family: 'JetBrains Mono', monospace; }
         .weekly-details { display: flex; justify-content: space-between; align-items: center; }
         .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
         .tech-color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
         .weekly-pay { font-weight: 700; font-size: 1rem; color: #34d399; font-family: 'JetBrains Mono', monospace; }
 
-        /* Ajustes y Configuración */
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        /* Panel de Estadísticas Equitativas */
+        .stats-grid { display: flex; flex-direction: column; gap: 10px; }
+        .stat-row { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; }
+        .stat-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+
+        /* Configuración de Tarifas */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .config-field { display: flex; flex-direction: column; gap: 4px; }
         .config-field label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-        .config-input { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: white; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+        .config-input { background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text-main); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
 
-        .technicians-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
+        .technicians-list { display: flex; flex-direction: column; gap: 8px; }
+        .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
 
-        /* Modal Épico de Confirmación */
-        #modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        /* Modal Épico */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         #modal-overlay.show { opacity: 1; pointer-events: auto; }
-        .modal-box { background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.4); border-radius: var(--radius-lg); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); text-align: center; }
+        .modal-box { background: var(--bg-card); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 0 40px var(--accent-glow); text-align: center; }
         
-        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.5); color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.85rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s backdrop-filter: blur(10px); }
+        #toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card); border: 1px solid var(--accent); color: var(--text-main); padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.85rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); }
         #toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
@@ -107,10 +131,16 @@
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 20px; color: #60a5fa;" class="font-mono-custom">PRO_V3</span></h1>
+                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">HUD_V4</span></h1>
             </div>
             <div class="header-actions">
-                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Cuadrante Anual</button>
+                <!-- Selector de Temas HUD -->
+                <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 8px 12px; font-weight: 600;">
+                    <option value="stark">Stark Tech (Azul)</option>
+                    <option value="cyberpunk">Cyberpunk (Neón)</option>
+                    <option value="matrix">Matrix (Verde)</option>
+                </select>
+                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Cuadrante</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
                     <span id="current-month-label" style="min-width: 170px; text-align: center;" class="font-mono-custom text-sm"></span>
@@ -124,13 +154,13 @@
             <div class="active-info">
                 <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
                 <div>
-                    <span class="text-xs font-mono-custom text-blue-400 uppercase tracking-widest block mb-1">Técnico de Guardia Actual</span>
+                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-1" style="color: var(--accent);">Técnico en Servicio Activo</span>
                     <h2 class="text-lg font-bold text-white" id="active-tech-name">Sincronizando...</h2>
                 </div>
             </div>
             <div class="text-right">
                 <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
-                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Turno Activo</span>
+                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Enlazado</span>
             </div>
         </div>
 
@@ -138,7 +168,7 @@
             <!-- Calendario Principal -->
             <div class="card calendar-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days text-blue-400"></i> Calendario Operativo</h2>
+                    <h2 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico</h2>
                     <div class="calendar-legend" style="margin-bottom: 0;">
                         <div class="legend-item"><span class="fest-icon fest-nac">NAC</span> Nac</div>
                         <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> Aut</div>
@@ -150,18 +180,24 @@
                 </div>
             </div>
 
-            <!-- Panel Lateral de Gestión -->
+            <!-- Panel Lateral de Control -->
             <aside class="sidebar">
+                <!-- Estadísticas y Reparto Equitativo -->
+                <div class="card sidebar-card">
+                    <h3><span><i class="fa-solid fa-chart-pie text-amber-400"></i> Estadísticas & Festivos</span></h3>
+                    <div class="stats-grid" id="stats-grid-container"></div>
+                </div>
+
                 <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
-                    <h3><span><i class="fa-solid fa-coins text-amber-400"></i> Tarifas Guardias</span></h3>
+                    <h3><span><i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas</span></h3>
                     <div class="config-grid">
                         <div class="config-field">
-                            <label>Laboral (€/día)</label>
+                            <label>Laboral (€)</label>
                             <input type="number" id="rate-lab" value="28" class="config-input" onchange="actualizarTarifas()">
                         </div>
                         <div class="config-field">
-                            <label>Festivo (€/día)</label>
+                            <label>Festivo (€)</label>
                             <input type="number" id="rate-fes" value="70" class="config-input" onchange="actualizarTarifas()">
                         </div>
                     </div>
@@ -170,7 +206,7 @@
                 <!-- Gestión de Técnicos -->
                 <div class="card sidebar-card">
                     <h3>
-                        <span><i class="fa-solid fa-users text-indigo-400"></i> Personal Técnico</span>
+                        <span><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
                         <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="addTechnician()"><i class="fa-solid fa-plus"></i> Añadir</button>
                     </h3>
                     <div class="technicians-list" id="technicians-list-container"></div>
@@ -178,24 +214,24 @@
 
                 <!-- Resumen Semanal -->
                 <div class="card sidebar-card">
-                    <h3><span><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span> <span class="text-xs text-slate-400 font-mono-custom">(Vie - Vie)</span></h3>
+                    <h3><span><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span> <span class="text-xs text-slate-400 font-mono-custom">(Vie-Vie)</span></h3>
                     <div class="weekly-summary-list" id="weekly-summary"></div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- Modal de Confirmación para Nuevo Cuadrante -->
+    <!-- Modal de Confirmación -->
     <div id="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <h3 class="text-lg font-bold text-white mb-2">¿Generar Nuevo Cuadrante?</h3>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">Esta acción recalculará las asignaciones anuales de forma equitativa, protegiendo y rotando los festivos respecto al año anterior para evitar duplicidades. ¿Deseas continuar?</p>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">El algoritmo recalculará las rotaciones anuales de forma equitativa protegiendo los festivos previos. ¿Proceder?</p>
             <div class="flex gap-3 justify-center">
                 <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()">Cancelar</button>
-                <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar y Generar</button>
+                <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar</button>
             </div>
         </div>
     </div>
@@ -209,7 +245,7 @@
         try { dbSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) {}
 
         let currentYear = 2026;
-        let currentMonth = 8; // Septiembre por defecto según contexto
+        let currentMonth = 8;
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         let tarifas = { lab: 28, fes: 70 };
@@ -242,6 +278,28 @@
             "9-12": [{type: "nac", label: "Fiesta Nacional"}], "10-1": [{type: "nac", label: "Todos los Santos"}], "11-25": [{type: "nac", label: "Navidad"}]
         };
 
+        // Generador de Sonidos Sci-Fi por Web Audio API
+        function playBeep(tipo = 'click') {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = tipo === 'success' ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(tipo === 'success' ? 880 : 440, ctx.currentTime);
+                if(tipo === 'success') osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e) {}
+        }
+
+        function cambiarTemaHUD(tema) {
+            document.documentElement.setAttribute('data-theme', tema);
+            playBeep('click');
+            showToast(`🎨 Tema HUD cambiado a ${tema.toUpperCase()}`);
+        }
+
         function showToast(msg) {
             const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
@@ -266,15 +324,15 @@
             render();
         }
 
-        function abrirModalConfirmacion() { document.getElementById('modal-overlay').classList.add('show'); }
+        function abrirModalConfirmacion() { playBeep('click'); document.getElementById('modal-overlay').classList.add('show'); }
         function cerrarModalConfirmacion() { document.getElementById('modal-overlay').classList.remove('show'); }
 
         async function ejecutarGeneracionAnual() {
             cerrarModalConfirmacion();
-            // Algoritmo equitativo rotando festivos respecto al año previo
+            playBeep('success');
             let keys = Object.keys(cuadranteOficial2026).sort();
             let techNames = tecnicos.map(t => t.name);
-            let idx = Math.floor(Math.random() * techNames.length); // Rotación inicial inteligente
+            let idx = Math.floor(Math.random() * techNames.length);
             
             guardiasSemanas = {};
             keys.forEach(k => {
@@ -287,14 +345,15 @@
                 await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
             }
             render();
-            showToast("✨ Nuevo cuadrante anual generado de forma equitativa");
+            showToast("✨ Nuevo cuadrante generado con rotación equitativa");
         }
 
         function actualizarTarifas() {
             tarifas.lab = parseFloat(document.getElementById('rate-lab').value) || 0;
             tarifas.fes = parseFloat(document.getElementById('rate-fes').value) || 0;
+            playBeep('click');
             render();
-            showToast("💰 Tarifas actualizadas en todo el sistema");
+            showToast("💰 Tarifas actualizadas");
         }
 
         function render() {
@@ -303,11 +362,11 @@
             renderCalendar();
             renderWeekly();
             renderTechniciansManager();
+            renderStats();
         }
 
         function renderActiveGuardBanner() {
             let today = new Date();
-            // Buscar la semana activa actual
             let dCheck = new Date(today);
             while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
             let fechaStr = dCheck.toISOString().split('T')[0];
@@ -321,9 +380,6 @@
             document.getElementById('active-tech-name').innerText = tecnicoActual;
             document.getElementById('active-tech-name').style.color = color;
             document.getElementById('active-tech-icon').style.color = color;
-            document.getElementById('active-tech-icon').style.borderColor = `${color}55`;
-            document.getElementById('active-tech-icon').style.background = `${color}15`;
-            document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()} de ${monthsNames[dCheck.getMonth()]} al ${fechaFin.getDate()} de ${monthsNames[fechaFin.getMonth()]}`;
         }
 
         function renderCalendar() {
@@ -397,7 +453,7 @@
                         <div class="weekly-details">
                             <div class="weekly-tech">
                                 <span class="tech-color-dot" style="background:${color}; color:${color}"></span>
-                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:rgba(15,23,42,0.9); color:var(--text-main); border-radius:6px; padding:4px 8px; font-weight:600; font-size:0.85rem;">
+                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:var(--bg-app); color:var(--text-main); border-radius:6px; padding:4px 8px; font-weight:600; font-size:0.85rem;">
                                     ${tecnicos.map(t => `<option value="${t.name}" ${t.name === tecnico ? 'selected' : ''}>${t.name}</option>`).join('')}
                                 </select>
                             </div>
@@ -419,7 +475,32 @@
                             <span class="tech-color-dot" style="background:${t.color}; color:${t.color}"></span>
                             <span style="font-weight: 600;">${t.name}</span>
                         </div>
-                        <button onclick="removeTechnician('${t.name}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; color: #f87171;" title="Dar de baja"><i class="fa-solid fa-user-minus"></i></button>
+                        <button onclick="removeTechnician('${t.name}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; color: #f87171;" title="Baja"><i class="fa-solid fa-user-minus"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderStats() {
+            const container = document.getElementById('stats-grid-container');
+            container.innerHTML = '';
+            let conteo = {};
+            tecnicos.forEach(t => conteo[t.name] = 0);
+            let totalGuards = 0;
+            for (let k in guardiasSemanas) {
+                let tech = guardiasSemanas[k];
+                if (conteo[tech] !== undefined) { conteo[tech]++; totalGuards++; }
+            }
+            tecnicos.forEach(t => {
+                let count = conteo[t.name] || 0;
+                let pct = totalGuards > 0 ? Math.round((count / totalGuards) * 100) : 0;
+                container.innerHTML += `
+                    <div class="stat-row">
+                        <div class="flex justify-between font-semibold">
+                            <span>${t.name}</span>
+                            <span class="font-mono-custom">${count} sem (${pct}%)</span>
+                        </div>
+                        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${pct}%; background: ${t.color};"></div></div>
                     </div>
                 `;
             });
@@ -431,25 +512,26 @@
             let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e"];
             let color = colores[tecnicos.length % colores.length];
             tecnicos.push({ id: tecnicos.length + 1, name: nombre, color: color });
+            playBeep('success');
             render();
             showToast(`✅ Técnico ${nombre} incorporado`);
         }
 
         function removeTechnician(name) {
             if (tecnicos.length <= 1) { showToast("⚠️ No se puede eliminar al último técnico"); return; }
-            if (confirm(`¿Dar de baja a ${name}? Sus guardias actuales pasarán al siguiente disponible.`)) {
+            if (confirm(`¿Dar de baja a ${name}?`)) {
                 tecnicos = tecnicos.filter(t => t.name !== name);
                 let fallback = tecnicos[0].name;
-                for (let k in guardiasSemanas) {
-                    if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback;
-                }
+                for (let k in guardiasSemanas) { if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback; }
+                playBeep('click');
                 render();
-                showToast(`ℹ️ Técnico dado de baja y guardias reasignadas`);
+                showToast(`ℹ️ Técnico dado de baja`);
             }
         }
 
         async function cambiarTecnico(fechaStr, nuevo) {
             guardiasSemanas[fechaStr] = nuevo;
+            playBeep('success');
             if (dbSupabase) await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
             render(); 
             showToast("☁️ Guardia reasignada con éxito");
@@ -459,6 +541,7 @@
             currentMonth += dir;
             if (currentMonth > 11) { currentMonth = 0; currentYear++; }
             else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            playBeep('click');
             render();
         }
 
