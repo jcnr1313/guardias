@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Guardias • HUD Command Center</title>
+    <title>Gestión de Guardias • HUD Command Center V6</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para iconos -->
@@ -33,19 +33,18 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; position: relative; overflow-x: hidden; }
+        body { background-color: var(--bg-app); color: var(--text-main); padding: 20px; min-height: 100vh; position: relative; overflow-x: hidden; }
         
-        /* Efecto de Radar / Fondo Cibernético */
         body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%); opacity: 0.15; pointer-events: none; z-index: -1; }
 
         .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
-        .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
-        header { background: var(--bg-card); backdrop-filter: blur(16px); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
-        header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 12px; }
-        .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        header { background: var(--bg-card); backdrop-filter: blur(16px); padding: 18px 24px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 1.3rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 12px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
-        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; text-decoration: none;}
+        .btn { padding: 9px 14px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.82rem; display: flex; align-items: center; gap: 8px; text-decoration: none;}
         .btn-primary { background: var(--accent); color: white; box-shadow: 0 0 15px var(--accent-glow); }
         .btn-primary:hover { filter: brightness(1.2); transform: translateY(-1px); }
         .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
@@ -53,75 +52,102 @@
         .btn-secondary { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border); color: var(--text-main); backdrop-filter: blur(8px); }
         .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: var(--accent); }
         
-        .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
+        .month-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1rem; }
+
+        /* Widget de Estado de Red HUD */
+        .network-status-badge { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; }
+        .net-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; transition: background 0.3s; }
+        .net-dot.online { background: #22c55e; color: #22c55e; animation: pulse 2s infinite; }
+        .net-dot.sync { background: #f59e0b; color: #f59e0b; }
+        .net-dot.offline { background: #ef4444; color: #ef4444; }
 
         /* Banner de Guardia Activa HUD */
-        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; transition: opacity 0.3s; }
+        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 18px 22px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; transition: opacity 0.3s; }
         .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
         .active-info { display: flex; align-items: center; gap: 15px; }
-        .active-avatar { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-glow); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent); }
+        .active-avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-glow); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--accent); }
         
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
-        @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 400px; gap: 20px; align-items: start; }
+        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
         
-        .card { background: var(--bg-card); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .card { background: var(--bg-card); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         .calendar-card { overflow-x: auto; }
-        .calendar-legend { display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .calendar-legend { display: flex; gap: 12px; font-size: 0.75rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
         
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 3px; background: var(--border); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
-        .cal-header { text-align: center; font-weight: 700; font-size: 0.75rem; color: var(--text-muted); padding: 12px 4px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
-        .cal-cell { background: var(--bg-app); min-height: 110px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
+        /* Calendario adaptativo para móviles y PC */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(85px, 1fr)); gap: 3px; background: var(--border); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+        .cal-header { text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); padding: 10px 4px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
+        .cal-cell { background: var(--bg-app); min-height: 100px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
         .cal-cell:hover { background: rgba(255, 255, 255, 0.03); }
-        .cal-cell.other-month { opacity: 0.35; }
+        .cal-cell.other-month { opacity: 0.3; }
+        .cal-cell.dimmed { opacity: 0.25; filter: grayscale(50%); }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
-        .day-num { font-weight: 700; font-size: 0.95rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
+        .day-num { font-weight: 700; font-size: 0.9rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
         .cal-cell.is-festivo .day-num { color: #f87171; }
-        .fest-icons { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
-        .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; letter-spacing: 0.05em; }
+        .fest-icons { display: flex; gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
+        .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 2px 4px; border-radius: 3px; color: white; letter-spacing: 0.05em; }
         .fest-nac { background-color: #dc2626; } .fest-aut { background-color: #ea580c; } .fest-loc { background-color: #9333ea; }
         
-        .guardia-banner { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 4px 6px; border-radius: 6px; text-align: center; margin: 6px 0; z-index: 2; letter-spacing: 0.03em; backdrop-filter: blur(4px); }
-        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; font-family: 'JetBrains Mono', monospace; }
+        .guardia-banner { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 3px 5px; border-radius: 5px; text-align: center; margin: 4px 0; z-index: 2; letter-spacing: 0.03em; backdrop-filter: blur(4px); }
+        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.6rem; color: var(--text-muted); z-index: 2; margin-top: auto; font-family: 'JetBrains Mono', monospace; }
         .rate-row { display: flex; justify-content: space-between; }
         .rate-val { font-weight: 600; }
         .cal-cell.is-festivo .rate-row.lab { text-decoration: line-through; opacity: 0.4; }
         .cal-cell.is-festivo .rate-row.fes { color: #f87171; font-weight: bold; }
         
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .sidebar-card h3 { font-size: 1.05rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .sidebar { display: flex; flex-direction: column; gap: 18px; }
+        .sidebar-card h3 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .sidebar-card h3 .title-left { display: flex; align-items: center; gap: 8px; }
         
-        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
-        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); }
-        .weekly-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; font-family: 'JetBrains Mono', monospace; }
-        .weekly-details { display: flex; justify-content: space-between; align-items: center; }
-        .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
-        .tech-color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
-        .weekly-pay { font-weight: 700; font-size: 1rem; color: #34d399; font-family: 'JetBrains Mono', monospace; }
+        /* Tooltip de Información */
+        .info-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
+        .info-tooltip-container:hover { color: var(--accent); }
+        .info-tooltip { position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid var(--accent); color: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: normal; width: 200px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; }
+        .info-tooltip-container:hover .info-tooltip { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-2px); }
 
-        /* Panel de Estadísticas Equitativas */
-        .stats-grid { display: flex; flex-direction: column; gap: 10px; }
-        .stat-row { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; }
-        .stat-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+        .weekly-summary-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
+        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.2); }
+        .weekly-header { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+        .weekly-details { display: flex; justify-content: space-between; align-items: center; }
+        .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.85rem; }
+        .tech-color-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px currentColor; }
+        .weekly-pay { font-weight: 700; font-size: 0.95rem; color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .stats-grid { display: flex; flex-direction: column; gap: 8px; }
+        .stat-row { display: flex; flex-direction: column; gap: 3px; background: rgba(0,0,0,0.2); padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.78rem; }
+        .stat-bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
         .stat-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
 
-        /* Configuración de Tarifas */
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .config-field { display: flex; flex-direction: column; gap: 4px; }
-        .config-field label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-        .config-input { background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text-main); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; width: 100%; }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .config-field { display: flex; flex-direction: column; gap: 3px; }
+        .config-field label { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+        .config-input { background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text-main); font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; width: 100%; }
 
-        .technicians-list { display: flex; flex-direction: column; gap: 8px; }
-        .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
+        .technicians-list { display: flex; flex-direction: column; gap: 6px; }
+        .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.82rem; }
 
-        /* Modal Épico / Generales */
+        /* Terminal de Log de Actividad */
+        .audit-log { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #34d399; max-height: 90px; overflow-y: auto; }
+        .audit-log-item { margin-bottom: 3px; opacity: 0.85; }
+
+        /* Modales */
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--bg-card); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 0 40px var(--accent-glow); text-align: center; }
+        .modal-box { background: var(--bg-card); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 0 40px var(--accent-glow); text-align: center; }
         
-        #toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card); border: 1px solid var(--accent); color: var(--text-main); padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.85rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); }
+        #toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--accent); color: var(--text-main); padding: 10px 18px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.82rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); }
         #toast.show { transform: translateY(0); opacity: 1; }
+
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            header, .sidebar, .header-actions, .active-guard-banner, #toast, .modal-overlay { display: none !important; }
+            .card { border: none; box-shadow: none; background: white; padding: 0; }
+            .calendar-grid { border: 1px solid #ccc; }
+            .cal-cell { background: white; border: 1px solid #eee; min-height: 80px; }
+            .day-num { color: black; }
+        }
     </style>
 </head>
 <body>
@@ -129,21 +155,27 @@
     <div class="main-container">
         <!-- Cabecera -->
         <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">HUD_V5</span></h1>
+                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.65rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">V6_HUD</span></h1>
             </div>
             <div class="header-actions">
-                <!-- Selector de Temas HUD -->
-                <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 8px 12px; font-weight: 600; width: auto;">
-                    <option value="stark">Stark Tech (Azul)</option>
-                    <option value="cyberpunk">Cyberpunk (Neón)</option>
+                <!-- Indicador de Red en Tiempo Real -->
+                <div class="network-status-badge" id="net-status-badge" title="Estado de la Sincronización en Directo">
+                    <span class="net-dot online" id="net-dot"></span>
+                    <span id="net-text" class="font-mono-custom">En Línea</span>
+                </div>
+                <!-- Selector de Temas -->
+                <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 7px 10px; font-weight: 600; width: auto;">
+                    <option value="stark">Stark (Azul)</option>
+                    <option value="cyberpunk">Cyberpunk</option>
                     <option value="matrix">Matrix (Verde)</option>
                 </select>
-                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Cuadrante</button>
+                <button class="btn btn-secondary" onclick="window.print()" title="Imprimir / Exportar PDF"><i class="fa-solid fa-print"></i></button>
+                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                    <span id="current-month-label" style="min-width: 170px; text-align: center;" class="font-mono-custom text-sm"></span>
+                    <span id="current-month-label" style="min-width: 155px; text-align: center;" class="font-mono-custom text-sm"></span>
                     <button class="btn btn-secondary" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
@@ -154,22 +186,28 @@
             <div class="active-info">
                 <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
                 <div>
-                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-1" style="color: var(--accent);" id="active-banner-subtitle">Técnico en Servicio Activo</span>
-                    <h2 class="text-lg font-bold text-white" id="active-tech-name">Sincronizando...</h2>
+                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-0.5" style="color: var(--accent);" id="active-banner-subtitle">Técnico en Servicio Activo</span>
+                    <h2 class="text-base font-bold text-white" id="active-tech-name">Sincronizando...</h2>
                 </div>
             </div>
             <div class="text-right">
                 <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
-                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Enlazado</span>
+                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado</span>
             </div>
         </div>
 
         <div class="dashboard-grid">
             <!-- Calendario Principal -->
             <div class="card calendar-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico</h2>
-                    <div class="calendar-legend" style="margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico</h2>
+                        <!-- Filtro Rápido por Técnico -->
+                        <select id="filter-tech-select" onchange="render()" class="config-input" style="padding: 4px 8px; width: auto; font-size: 0.75rem;">
+                            <option value="all">Filtro: Todos</option>
+                        </select>
+                    </div>
+                    <div class="calendar-legend">
                         <div class="legend-item"><span class="fest-icon fest-nac">NAC</span> Nac</div>
                         <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> Aut</div>
                         <div class="legend-item"><span class="fest-icon fest-loc">LOC</span> Loc</div>
@@ -184,13 +222,25 @@
             <aside class="sidebar">
                 <!-- Estadísticas y Reparto Equitativo -->
                 <div class="card sidebar-card">
-                    <h3><span><i class="fa-solid fa-chart-pie text-amber-400"></i> Estadísticas & Festivos</span></h3>
+                    <h3>
+                        <span class="title-left"><i class="fa-solid fa-chart-pie text-amber-400"></i> Reparto Equitativo</span>
+                        <div class="info-tooltip-container">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <div class="info-tooltip">Porcentaje y total de semanas asignadas a cada técnico para asegurar un balance equitativo anual.</div>
+                        </div>
+                    </h3>
                     <div class="stats-grid" id="stats-grid-container"></div>
                 </div>
 
                 <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
-                    <h3><span><i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas</span></h3>
+                    <h3>
+                        <span class="title-left"><i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas</span>
+                        <div class="info-tooltip-container">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <div class="info-tooltip">Coste por día laboral y festivo aplicado automáticamente en el cálculo de cada semana de guardia.</div>
+                        </div>
+                    </h3>
                     <div class="config-grid">
                         <div class="config-field">
                             <label>Laboral (€)</label>
@@ -206,29 +256,43 @@
                 <!-- Gestión de Técnicos -->
                 <div class="card sidebar-card">
                     <h3>
-                        <span><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
-                        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="abrirModalTech()"><i class="fa-solid fa-plus"></i> Añadir</button>
+                        <span class="title-left"><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
+                        <button class="btn btn-primary" style="padding: 3px 7px; font-size: 0.72rem;" onclick="abrirModalTech()"><i class="fa-solid fa-plus"></i> Añadir</button>
                     </h3>
                     <div class="technicians-list" id="technicians-list-container"></div>
                 </div>
 
                 <!-- Resumen Semanal -->
                 <div class="card sidebar-card">
-                    <h3><span><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span> <span class="text-xs text-slate-400 font-mono-custom">(Vie-Vie)</span></h3>
+                    <h3>
+                        <span class="title-left"><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span>
+                        <span class="text-xs text-slate-400 font-mono-custom">(Vie-Vie)</span>
+                    </h3>
                     <div class="weekly-summary-list" id="weekly-summary"></div>
+                </div>
+
+                <!-- Log de Auditoría en Tiempo Real -->
+                <div class="card sidebar-card">
+                    <h3>
+                        <span class="title-left"><i class="fa-solid fa-terminal text-cyan-400"></i> Actividad en Red</span>
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    </h3>
+                    <div class="audit-log" id="audit-log-container">
+                        <div class="audit-log-item">[Sistema] Terminal HUD conectada...</div>
+                    </div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <!-- Modal de Confirmación de Cuadrante -->
+    <!-- Modales -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-lg font-bold text-white mb-2">¿Generar Nuevo Cuadrante?</h3>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">El algoritmo recalculará las rotaciones anuales de forma equitativa protegiendo los festivos previos. ¿Proceder?</p>
+            <h3 class="text-base font-bold text-white mb-2">¿Generar Nuevo Cuadrante?</h3>
+            <p class="text-xs text-slate-400 mb-5 leading-relaxed">El algoritmo recalculará las rotaciones anuales de forma equitativa. ¿Proceder?</p>
             <div class="flex gap-3 justify-center">
                 <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()">Cancelar</button>
                 <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar</button>
@@ -236,15 +300,14 @@
         </div>
     </div>
 
-    <!-- Modal Interactivo para Añadir Técnico -->
     <div id="modal-tech" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-user-plus"></i>
             </div>
-            <h3 class="text-lg font-bold text-white mb-2">Añadir Nuevo Técnico</h3>
-            <p class="text-xs text-slate-400 mb-4">Introduce el nombre del operador para integrarlo en la red de guardias.</p>
-            <input type="text" id="input-new-tech-name" placeholder="Nombre y apellidos..." class="config-input mb-6" style="padding: 10px; font-family: 'Inter', sans-serif;">
+            <h3 class="text-base font-bold text-white mb-2">Añadir Nuevo Técnico</h3>
+            <p class="text-xs text-slate-400 mb-4">Introduce el nombre del operador para integrarlo en la red.</p>
+            <input type="text" id="input-new-tech-name" placeholder="Nombre y apellidos..." class="config-input mb-5" style="padding: 9px; font-family: 'Inter', sans-serif;">
             <div class="flex gap-3 justify-center">
                 <button class="btn btn-secondary" onclick="cerrarModalTech()">Cancelar</button>
                 <button class="btn btn-primary" onclick="guardarNuevoTecnico()">Registrar</button>
@@ -294,7 +357,6 @@
             "9-12": [{type: "nac", label: "Fiesta Nacional"}], "10-1": [{type: "nac", label: "Todos los Santos"}], "11-25": [{type: "nac", label: "Navidad"}]
         };
 
-        // Generador de Sonidos Sci-Fi por Web Audio API
         function playBeep(tipo = 'click') {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -314,6 +376,7 @@
             document.documentElement.setAttribute('data-theme', tema);
             playBeep('click');
             showToast(`🎨 Tema HUD cambiado a ${tema.toUpperCase()}`);
+            logAudit(`Tema cambiado a ${tema}`);
         }
 
         function showToast(msg) {
@@ -321,16 +384,18 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        function toggleLoading(show) {
-            let banner = document.getElementById('active-guard-container');
-            let subtitle = document.getElementById('active-banner-subtitle');
-            if (show) {
-                banner.style.opacity = '0.6';
-                subtitle.innerText = 'Sincronizando red...';
-            } else {
-                banner.style.opacity = '1';
-                subtitle.innerText = 'Técnico en Servicio Activo';
-            }
+        function logAudit(msg) {
+            const container = document.getElementById('audit-log-container');
+            const time = new Date().toLocaleTimeString();
+            container.innerHTML += `<div class="audit-log-item">[${time}] ${msg}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateNetworkStatus(status, text) {
+            const dot = document.getElementById('net-dot');
+            const txt = document.getElementById('net-text');
+            dot.className = `net-dot ${status}`;
+            txt.innerText = text;
         }
 
         function getFestivos(m, d) {
@@ -343,14 +408,13 @@
         async function init() {
             if (dbSupabase) {
                 try {
-                    toggleLoading(true);
+                    updateNetworkStatus('sync', 'Sincronizando');
                     let { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
                     if (guardData && guardData.length > 0) {
                         guardiasSemanas = {};
                         guardData.forEach(r => guardiasSemanas[r.fecha_inicio] = r.tecnico);
                     }
 
-                    // Sincronización extendida robusta para técnicos y tarifas (si existen tablas en Supabase)
                     let { data: techData } = await dbSupabase.from('tecnicos').select('*');
                     if (techData && techData.length > 0) tecnicos = techData;
 
@@ -360,15 +424,50 @@
                         document.getElementById('rate-lab').value = tarifas.lab;
                         document.getElementById('rate-fes').value = tarifas.fes;
                     }
+                    updateNetworkStatus('online', 'En Línea');
+                    logAudit("Sincronización con Supabase exitosa.");
+
+                    // Suscripción en Tiempo Real con Supabase Realtime
+                    dbSupabase.channel('public:guardias_semanas')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'guardias_semanas' }, payload => {
+                            if (payload.new && payload.new.fecha_inicio) {
+                                guardiasSemanas[payload.new.fecha_inicio] = payload.new.tecnico;
+                                render();
+                                logAudit(`Actualización en vivo: Sem. ${payload.new.fecha_inicio} -> ${payload.new.tecnico}`);
+                                showToast("⚡ Actualización en tiempo real recibida");
+                            }
+                        })
+                        .subscribe((status) => {
+                            if (status === 'SUBSCRIBED') {
+                                updateNetworkStatus('online', 'En Tiempo Real');
+                            } else {
+                                updateNetworkStatus('sync', 'Reconectando');
+                            }
+                        });
+
                 } catch(err) {
                     console.error("Error conectando con Supabase:", err);
-                    showToast("⚠️ Modo local activado (Error de red)");
-                } finally {
-                    toggleLoading(false);
+                    updateNetworkStatus('offline', 'Modo Local');
+                    logAudit("Error de red. Activado modo local.");
+                    showToast("⚠️ Modo local activado (Sin conexión)");
                 }
+            } else {
+                updateNetworkStatus('offline', 'Local');
             }
+
             if (Object.keys(guardiasSemanas).length === 0) guardiasSemanas = { ...cuadranteOficial2026 };
+            updateTechFilterOptions();
             render();
+        }
+
+        function updateTechFilterOptions() {
+            const select = document.getElementById('filter-tech-select');
+            let currentVal = select.value;
+            select.innerHTML = '<option value="all">Filtro: Todos</option>';
+            tecnicos.forEach(t => {
+                select.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+            });
+            select.value = currentVal;
         }
 
         function abrirModalConfirmacion() { playBeep('click'); document.getElementById('modal-overlay').classList.add('show'); }
@@ -397,17 +496,15 @@
 
             if (dbSupabase) {
                 try {
-                    toggleLoading(true);
                     let rows = Object.keys(guardiasSemanas).map(k => ({ fecha_inicio: k, tecnico: guardiasSemanas[k] }));
                     await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
                 } catch(e) {
-                    showToast("⚠️ Error al sincronizar nuevo cuadrante en nube");
-                } finally {
-                    toggleLoading(false);
+                    showToast("⚠️ Error al sincronizar nuevo cuadrante");
                 }
             }
             render();
             showToast("✨ Nuevo cuadrante generado con rotación equitativa");
+            logAudit("Generado nuevo cuadrante anual automático.");
         }
 
         async function actualizarTarifas() {
@@ -422,6 +519,7 @@
             }
             render();
             showToast("💰 Tarifas actualizadas");
+            logAudit(`Tarifas cambiadas: Lab ${tarifas.lab}€ | Fes ${tarifas.fes}€`);
         }
 
         function render() {
@@ -458,6 +556,7 @@
             const firstIdx = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+            const filtroTech = document.getElementById('filter-tech-select').value;
 
             for (let i = firstIdx - 1; i >= 0; i--) {
                 c.innerHTML += `<div class="cal-cell other-month"><span class="day-num">${prevDays - i}</span></div>`;
@@ -480,11 +579,12 @@
                 let tObj = tecnicos.find(t => t.name === techG);
                 let color = tObj ? tObj.color : '#64748b';
 
+                let isDimmed = (filtroTech !== 'all' && techG !== filtroTech);
                 let icons = '';
                 festivos.forEach(f => { if(f.type !== 'fin') icons += `<span class="fest-icon fest-${f.type}">${f.type.toUpperCase()}</span>`; });
 
                 c.innerHTML += `
-                    <div class="cal-cell ${isFest ? 'is-festivo' : ''}">
+                    <div class="cal-cell ${isFest ? 'is-festivo' : ''} ${isDimmed ? 'dimmed' : ''}">
                         <div class="day-header-row"><span class="day-num">${day}</span><div class="fest-icons">${icons}</div></div>
                         ${techG ? `<div class="guardia-banner" style="background-color:${color}20; color:${color}; border:1px solid ${color}40">${techG.split(' ')[0]}</div>` : ''}
                         <div class="day-rates">
@@ -522,7 +622,7 @@
                         <div class="weekly-details">
                             <div class="weekly-tech">
                                 <span class="tech-color-dot" style="background:${color}; color:${color}"></span>
-                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:var(--bg-app); color:var(--text-main); border-radius:6px; padding:4px 8px; font-weight:600; font-size:0.85rem;">
+                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:var(--bg-app); color:var(--text-main); border-radius:6px; padding:3px 6px; font-weight:600; font-size:0.8rem;">
                                     ${tecnicos.map(t => `<option value="${t.name}" ${t.name === tecnico ? 'selected' : ''}>${t.name}</option>`).join('')}
                                 </select>
                             </div>
@@ -544,7 +644,7 @@
                             <span class="tech-color-dot" style="background:${t.color}; color:${t.color}"></span>
                             <span style="font-weight: 600;">${t.name}</span>
                         </div>
-                        <button onclick="removeTechnician('${t.name}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; color: #f87171;" title="Baja"><i class="fa-solid fa-user-minus"></i></button>
+                        <button onclick="removeTechnician('${t.name}')" class="btn btn-secondary" style="padding: 2px 5px; font-size: 0.68rem; color: #f87171;" title="Baja"><i class="fa-solid fa-user-minus"></i></button>
                     </div>
                 `;
             });
@@ -577,14 +677,8 @@
 
         async function guardarNuevoTecnico() {
             let nombre = document.getElementById('input-new-tech-name').value.trim();
-            if (!nombre) {
-                showToast("⚠️ Introduce un nombre válido");
-                return;
-            }
-            if (tecnicos.some(t => t.name.toLowerCase() === nombre.toLowerCase())) {
-                showToast("⚠️ Este técnico ya existe");
-                return;
-            }
+            if (!nombre) { showToast("⚠️ Introduce un nombre válido"); return; }
+            if (tecnicos.some(t => t.name.toLowerCase() === nombre.toLowerCase())) { showToast("⚠️ Este técnico ya existe"); return; }
             
             let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e", "#06b6d4"];
             let color = colores[tecnicos.length % colores.length];
@@ -592,15 +686,15 @@
             tecnicos.push(nuevoTech);
 
             if (dbSupabase) {
-                try {
-                    await dbSupabase.from('tecnicos').upsert(nuevoTech, { onConflict: ['name'] });
-                } catch(e) {}
+                try { await dbSupabase.from('tecnicos').upsert(nuevoTech, { onConflict: ['name'] }); } catch(e) {}
             }
 
             cerrarModalTech();
+            updateTechFilterOptions();
             playBeep('success');
             render();
             showToast(`✅ Técnico ${nombre} incorporado`);
+            logAudit(`Técnico registrado: ${nombre}`);
         }
 
         async function removeTechnician(name) {
@@ -611,14 +705,14 @@
                 for (let k in guardiasSemanas) { if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback; }
                 
                 if (dbSupabase) {
-                    try {
-                        await dbSupabase.from('tecnicos').delete().eq('name', name);
-                    } catch(e) {}
+                    try { await dbSupabase.from('tecnicos').delete().eq('name', name); } catch(e) {}
                 }
 
+                updateTechFilterOptions();
                 playBeep('click');
                 render();
                 showToast(`ℹ️ Técnico dado de baja`);
+                logAudit(`Técnico dado de baja: ${name}`);
             }
         }
 
@@ -627,16 +721,14 @@
             playBeep('success');
             if (dbSupabase) {
                 try {
-                    toggleLoading(true);
                     await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
                 } catch(e) {
-                    showToast("⚠️ Error al sincronizar cambio en nube");
-                } finally {
-                    toggleLoading(false);
+                    showToast("⚠️ Error al sincronizar cambio");
                 }
             }
             render(); 
             showToast("☁️ Guardia reasignada con éxito");
+            logAudit(`Guardia ${fechaStr} -> ${nuevo}`);
         }
 
         function changeMonth(dir) {
