@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Guardias • HUD Command Center V6</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Temas HUD / Sci-Fi */
@@ -31,6 +28,12 @@
             --bg-app: #030712; --bg-card: rgba(17, 24, 39, 0.85); --text-main: #f3f4f6; --text-muted: #9ca3af;
             --border: rgba(55, 65, 81, 0.8); --accent: #06b6d4; --accent-glow: rgba(6, 182, 212, 0.5);
         }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.03); }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-app); color: var(--text-main); padding: 20px; min-height: 100vh; position: relative; overflow-x: hidden; }
@@ -153,19 +156,22 @@
 <body>
 
     <div class="main-container">
-        <!-- Cabecera -->
         <header>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.65rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">V6_HUD</span></h1>
+                <div class="w-12 h-12 p-1 rounded-xl bg-slate-900 border border-accent/40 flex items-center justify-center shadow-lg shadow-accent/20 animate-pulse-slow overflow-hidden shrink-0">
+                    <img src="logo.jpeg" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Cuadrante de Guardias</h1>
+                    <span style="font-size: 0.65rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">V6_HUD COMMAND CENTER</span>
+                </div>
             </div>
             <div class="header-actions">
-                <!-- Indicador de Red en Tiempo Real -->
                 <div class="network-status-badge" id="net-status-badge" title="Estado de la Sincronización en Directo">
                     <span class="net-dot online" id="net-dot"></span>
                     <span id="net-text" class="font-mono-custom">En Línea</span>
                 </div>
-                <!-- Selector de Temas -->
                 <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 7px 10px; font-weight: 600; width: auto;">
                     <option value="stark">Stark (Azul)</option>
                     <option value="cyberpunk">Cyberpunk</option>
@@ -181,7 +187,6 @@
             </div>
         </header>
 
-        <!-- Banner de Guardia Activa -->
         <div class="active-guard-banner" id="active-guard-container">
             <div class="active-info">
                 <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
@@ -197,12 +202,10 @@
         </div>
 
         <div class="dashboard-grid">
-            <!-- Calendario Principal -->
             <div class="card calendar-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico</h2>
-                        <!-- Filtro Rápido por Técnico -->
                         <select id="filter-tech-select" onchange="render()" class="config-input" style="padding: 4px 8px; width: auto; font-size: 0.75rem;">
                             <option value="all">Filtro: Todos</option>
                         </select>
@@ -218,9 +221,7 @@
                 </div>
             </div>
 
-            <!-- Panel Lateral de Control -->
             <aside class="sidebar">
-                <!-- Estadísticas y Reparto Equitativo -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-chart-pie text-amber-400"></i> Reparto Equitativo</span>
@@ -232,7 +233,6 @@
                     <div class="stats-grid" id="stats-grid-container"></div>
                 </div>
 
-                <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas</span>
@@ -253,7 +253,6 @@
                     </div>
                 </div>
 
-                <!-- Gestión de Técnicos -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
@@ -262,7 +261,6 @@
                     <div class="technicians-list" id="technicians-list-container"></div>
                 </div>
 
-                <!-- Resumen Semanal -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span>
@@ -271,7 +269,6 @@
                     <div class="weekly-summary-list" id="weekly-summary"></div>
                 </div>
 
-                <!-- Log de Auditoría en Tiempo Real -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-terminal text-cyan-400"></i> Actividad en Red</span>
@@ -285,7 +282,6 @@
         </div>
     </div>
 
-    <!-- Modales -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
@@ -427,7 +423,6 @@
                     updateNetworkStatus('online', 'En Línea');
                     logAudit("Sincronización con Supabase exitosa.");
 
-                    // Suscripción en Tiempo Real con Supabase Realtime
                     dbSupabase.channel('public:guardias_semanas')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'guardias_semanas' }, payload => {
                             if (payload.new && payload.new.fecha_inicio) {
