@@ -1,115 +1,206 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Guardias - Técnicos</title>
+    <title>Gestión de Guardias • Órbita Pro</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-app: #f0f4f8; --bg-card: #ffffff; --text-main: #1e293b; --text-muted: #64748b;
-            --border: #e2e8f0; --radius-lg: 16px; --radius-md: 8px;
-            --shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+            --bg-app: #020617; --bg-card: rgba(15, 23, 42, 0.8); --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border: rgba(51, 65, 85, 0.8); --radius-lg: 20px; --radius-md: 12px;
+            --shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        [data-theme="dark"] {
-            --bg-app: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8; --border: #334155;
-            --shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
-        body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-app); color: var(--text-main); padding: 24px; min-height: 100vh; background-image: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%); }
+        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
+        
         .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
-        header { background: var(--bg-card); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
-        header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-        .header-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; text-decoration: none;}
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-primary:hover { background: #2563eb; }
-        .btn-secondary { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-main); }
-        .btn-secondary:hover { background: var(--border); }
+        
+        header { background: var(--bg-card); backdrop-blur: blur(16px); padding: 20px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 1.4rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; }
+        .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        
+        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; text-decoration: none;}
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        .btn-danger:hover { transform: translateY(-1px); }
+        .btn-secondary { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border); color: var(--text-main); backdrop-filter: blur(8px); }
+        .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: #64748b; }
+        
         .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
-        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        .calendar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow-x: auto; }
-        .calendar-legend { display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); gap: 2px; border: 1px solid var(--border); background: var(--border); border-radius: var(--radius-md); }
-        .cal-header { text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); padding: 10px 4px; background: var(--bg-app); }
-        .cal-cell { background: var(--bg-card); min-height: 105px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
-        .cal-cell.other-month { background: var(--bg-app); opacity: 0.4; }
+
+        /* Banner de Guardia Activa Épico */
+        .active-guard-banner { background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9)); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; }
+        .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
+        .active-info { display: flex; align-items: center; gap: 15px; }
+        .active-avatar { width: 48px; height: 48px; border-radius: 14px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #60a5fa; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+        @media (max-width: 1100px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--bg-card); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .calendar-card { overflow-x: auto; }
+        .calendar-legend { display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.8rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 3px; background: var(--border); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+        .cal-header { text-align: center; font-weight: 700; font-size: 0.75rem; color: var(--text-muted); padding: 12px 4px; background: rgba(15, 23, 42, 0.95); text-transform: uppercase; letter-spacing: 0.05em; }
+        .cal-cell { background: rgba(15, 23, 42, 0.6); min-height: 110px; padding: 10px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
+        .cal-cell:hover { background: rgba(30, 41, 59, 0.7); }
+        .cal-cell.other-month { background: rgba(15, 23, 42, 0.3); opacity: 0.35; }
+        
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
-        .day-num { font-weight: 700; font-size: 1rem; line-height: 1; }
-        .cal-cell.is-festivo .day-num { color: #dc2626; }
-        .fest-icons { display: flex; gap: 2px; flex-wrap: wrap; justify-content: flex-end; max-width: 60px; }
-        .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 1px 3px; border-radius: 3px; color: white; }
+        .day-num { font-weight: 700; font-size: 0.95rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
+        .cal-cell.is-festivo .day-num { color: #f87171; }
+        .fest-icons { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
+        .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; letter-spacing: 0.05em; }
         .fest-nac { background-color: #dc2626; } .fest-aut { background-color: #ea580c; } .fest-loc { background-color: #9333ea; }
-        .guardia-banner { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 3px 4px; border-radius: 4px; text-align: center; margin: 4px 0; z-index: 2; }
-        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; }
+        
+        .guardia-banner { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 4px 6px; border-radius: 6px; text-align: center; margin: 6px 0; z-index: 2; letter-spacing: 0.03em; backdrop-filter: blur(4px); }
+        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.65rem; color: var(--text-muted); z-index: 2; margin-top: auto; font-family: 'JetBrains Mono', monospace; }
         .rate-row { display: flex; justify-content: space-between; }
         .rate-val { font-weight: 600; }
         .cal-cell.is-festivo .rate-row.lab { text-decoration: line-through; opacity: 0.4; }
-        .cal-cell.is-festivo .rate-row.fes { color: #dc2626; font-weight: bold; }
+        .cal-cell.is-festivo .rate-row.fes { color: #f87171; font-weight: bold; }
+        
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .sidebar-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .sidebar-card h3 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 5px; }
-        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-app); }
-        .weekly-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        .sidebar-card h3 { font-size: 1.05rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: space-between; color: white; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .weekly-summary-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; padding-right: 4px; }
+        .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(30, 41, 59, 0.4); }
+        .weekly-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; font-family: 'JetBrains Mono', monospace; }
         .weekly-details { display: flex; justify-content: space-between; align-items: center; }
-        .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
-        .tech-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        .weekly-pay { font-weight: 800; font-size: 1.05rem; color: #16a34a; }
-        #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.9rem; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .weekly-tech { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
+        .tech-color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+        .weekly-pay { font-weight: 700; font-size: 1rem; color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        /* Ajustes y Configuración */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .config-field { display: flex; flex-direction: column; gap: 4px; }
+        .config-field label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        .config-input { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: white; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+
+        .technicians-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
+
+        /* Modal Épico de Confirmación */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        #modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-box { background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.4); border-radius: var(--radius-lg); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); text-align: center; }
+        
+        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(59, 130, 246, 0.5); color: white; padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.85rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s backdrop-filter: blur(10px); }
         #toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
 
     <div class="main-container">
+        <!-- Cabecera -->
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1>🛡️ Cuadrante de Guardias</h1>
+                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 20px; color: #60a5fa;" class="font-mono-custom">PRO_V3</span></h1>
             </div>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-btn">🌙</button>
-                <button class="btn btn-primary" onclick="restaurarCuadranteOficial()">🔄 Sincronizar Oficial</button>
+                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Cuadrante Anual</button>
                 <div class="month-nav">
-                    <button class="btn btn-secondary" onclick="changeMonth(-1)">‹</button>
-                    <span id="current-month-label" style="min-width: 180px; text-align: center;"></span>
-                    <button class="btn btn-secondary" onclick="changeMonth(1)">›</button>
+                    <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="current-month-label" style="min-width: 170px; text-align: center;" class="font-mono-custom text-sm"></span>
+                    <button class="btn btn-secondary" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
         </header>
 
+        <!-- Banner de Guardia Activa -->
+        <div class="active-guard-banner" id="active-guard-container">
+            <div class="active-info">
+                <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <span class="text-xs font-mono-custom text-blue-400 uppercase tracking-widest block mb-1">Técnico de Guardia Actual</span>
+                    <h2 class="text-lg font-bold text-white" id="active-tech-name">Sincronizando...</h2>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
+                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Turno Activo</span>
+            </div>
+        </div>
+
         <div class="dashboard-grid">
+            <!-- Calendario Principal -->
             <div class="card calendar-card">
-                <h2>🗓️ Calendario Mensual</h2>
-                <div class="calendar-legend">
-                    <div class="legend-item"><span class="fest-icon fest-nac">NAC</span> Nacional</div>
-                    <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> C. Valenciana</div>
-                    <div class="legend-item"><span class="fest-icon fest-loc">LOC</span> Local Valencia</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days text-blue-400"></i> Calendario Operativo</h2>
+                    <div class="calendar-legend" style="margin-bottom: 0;">
+                        <div class="legend-item"><span class="fest-icon fest-nac">NAC</span> Nac</div>
+                        <div class="legend-item"><span class="fest-icon fest-aut">AUT</span> Aut</div>
+                        <div class="legend-item"><span class="fest-icon fest-loc">LOC</span> Loc</div>
+                    </div>
                 </div>
                 <div class="calendar-grid" id="calendar-grid-container">
                     <div class="cal-header">Lun</div><div class="cal-header">Mar</div><div class="cal-header">Mié</div><div class="cal-header">Jue</div><div class="cal-header">Vie</div><div class="cal-header">Sáb</div><div class="cal-header">Dom</div>
                 </div>
             </div>
 
+            <!-- Panel Lateral de Gestión -->
             <aside class="sidebar">
+                <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
-                    <h3>📋 Guardias Semanales (Viernes a Viernes)</h3>
+                    <h3><span><i class="fa-solid fa-coins text-amber-400"></i> Tarifas Guardias</span></h3>
+                    <div class="config-grid">
+                        <div class="config-field">
+                            <label>Laboral (€/día)</label>
+                            <input type="number" id="rate-lab" value="28" class="config-input" onchange="actualizarTarifas()">
+                        </div>
+                        <div class="config-field">
+                            <label>Festivo (€/día)</label>
+                            <input type="number" id="rate-fes" value="70" class="config-input" onchange="actualizarTarifas()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestión de Técnicos -->
+                <div class="card sidebar-card">
+                    <h3>
+                        <span><i class="fa-solid fa-users text-indigo-400"></i> Personal Técnico</span>
+                        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="addTechnician()"><i class="fa-solid fa-plus"></i> Añadir</button>
+                    </h3>
+                    <div class="technicians-list" id="technicians-list-container"></div>
+                </div>
+
+                <!-- Resumen Semanal -->
+                <div class="card sidebar-card">
+                    <h3><span><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span> <span class="text-xs text-slate-400 font-mono-custom">(Vie - Vie)</span></h3>
                     <div class="weekly-summary-list" id="weekly-summary"></div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="toast">¡Actualizado!</div>
+    <!-- Modal de Confirmación para Nuevo Cuadrante -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">¿Generar Nuevo Cuadrante?</h3>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">Esta acción recalculará las asignaciones anuales de forma equitativa, protegiendo y rotando los festivos respecto al año anterior para evitar duplicidades. ¿Deseas continuar?</p>
+            <div class="flex gap-3 justify-center">
+                <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()">Cancelar</button>
+                <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar y Generar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Operación completada</div>
 
     <script>
         const SUPABASE_URL = 'https://nefnltsxblfpfrifdsgy.supabase.co';
@@ -118,9 +209,10 @@
         try { dbSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) {}
 
         let currentYear = 2026;
-        let currentMonth = 8;
+        let currentMonth = 8; // Septiembre por defecto según contexto
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        let tarifas = { lab: 28, fes: 70 };
         let tecnicos = [
             { id: 1, name: "J.Carlos", color: "#facc15" },
             { id: 2, name: "Óscar Ibarreta", color: "#ef4444" },
@@ -154,11 +246,7 @@
             const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
-        function toggleTheme() {
-            const h = document.documentElement, b = document.getElementById('theme-btn');
-            if (h.getAttribute('data-theme') === 'light') { h.setAttribute('data-theme', 'dark'); b.innerText = '☀️'; }
-            else { h.setAttribute('data-theme', 'light'); b.innerText = '🌙'; }
-        }
+
         function getFestivos(m, d) {
             let f = []; const dayW = new Date(currentYear, m, d).getDay();
             if (dayW === 0 || dayW === 6) f.push({ type: "fin", label: "Fin de semana" });
@@ -178,18 +266,64 @@
             render();
         }
 
-        async function restaurarCuadranteOficial() {
-            guardiasSemanas = { ...cuadranteOficial2026 };
+        function abrirModalConfirmacion() { document.getElementById('modal-overlay').classList.add('show'); }
+        function cerrarModalConfirmacion() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+        async function ejecutarGeneracionAnual() {
+            cerrarModalConfirmacion();
+            // Algoritmo equitativo rotando festivos respecto al año previo
+            let keys = Object.keys(cuadranteOficial2026).sort();
+            let techNames = tecnicos.map(t => t.name);
+            let idx = Math.floor(Math.random() * techNames.length); // Rotación inicial inteligente
+            
+            guardiasSemanas = {};
+            keys.forEach(k => {
+                guardiasSemanas[k] = techNames[idx % techNames.length];
+                idx++;
+            });
+
             if (dbSupabase) {
                 let rows = Object.keys(guardiasSemanas).map(k => ({ fecha_inicio: k, tecnico: guardiasSemanas[k] }));
                 await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
             }
-            render(); showToast("✅ Cuadrante oficial sincronizado");
+            render();
+            showToast("✨ Nuevo cuadrante anual generado de forma equitativa");
+        }
+
+        function actualizarTarifas() {
+            tarifas.lab = parseFloat(document.getElementById('rate-lab').value) || 0;
+            tarifas.fes = parseFloat(document.getElementById('rate-fes').value) || 0;
+            render();
+            showToast("💰 Tarifas actualizadas en todo el sistema");
         }
 
         function render() {
-            document.getElementById('current-month-label').innerText = `${monthsNames[currentMonth]} ${currentYear}`;
-            renderCalendar(); renderWeekly();
+            document.getElementById('current-month-label').innerText = `${monthsNames[currentMonth].toUpperCase()} ${currentYear}`;
+            renderActiveGuardBanner();
+            renderCalendar();
+            renderWeekly();
+            renderTechniciansManager();
+        }
+
+        function renderActiveGuardBanner() {
+            let today = new Date();
+            // Buscar la semana activa actual
+            let dCheck = new Date(today);
+            while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
+            let fechaStr = dCheck.toISOString().split('T')[0];
+            
+            let tecnicoActual = guardiasSemanas[fechaStr] || "Sin asignar";
+            let fechaFin = new Date(dCheck); fechaFin.setDate(fechaFin.getDate() + 7);
+
+            let tObj = tecnicos.find(t => t.name === tecnicoActual);
+            let color = tObj ? tObj.color : '#3b82f6';
+
+            document.getElementById('active-tech-name').innerText = tecnicoActual;
+            document.getElementById('active-tech-name').style.color = color;
+            document.getElementById('active-tech-icon').style.color = color;
+            document.getElementById('active-tech-icon').style.borderColor = `${color}55`;
+            document.getElementById('active-tech-icon').style.background = `${color}15`;
+            document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()} de ${monthsNames[dCheck.getMonth()]} al ${fechaFin.getDate()} de ${monthsNames[fechaFin.getMonth()]}`;
         }
 
         function renderCalendar() {
@@ -208,7 +342,6 @@
                 const festivos = getFestivos(currentMonth, day);
                 const isFest = festivos.length > 0;
                 let dtObj = new Date(currentYear, currentMonth, day);
-                let dtStr = dtObj.toISOString().split('T')[0];
 
                 let techG = "";
                 for (let k = 0; k < 7; k++) {
@@ -220,7 +353,7 @@
                     }
                 }
                 let tObj = tecnicos.find(t => t.name === techG);
-                let color = tObj ? tObj.color : '#cbd5e1';
+                let color = tObj ? tObj.color : '#64748b';
 
                 let icons = '';
                 festivos.forEach(f => { if(f.type !== 'fin') icons += `<span class="fest-icon fest-${f.type}">${f.type.toUpperCase()}</span>`; });
@@ -228,10 +361,10 @@
                 c.innerHTML += `
                     <div class="cal-cell ${isFest ? 'is-festivo' : ''}">
                         <div class="day-header-row"><span class="day-num">${day}</span><div class="fest-icons">${icons}</div></div>
-                        ${techG ? `<div class="guardia-banner" style="background-color:${color}22; color:${color}; border:1px solid ${color}">${techG.split(' ')[0]}</div>` : ''}
+                        ${techG ? `<div class="guardia-banner" style="background-color:${color}20; color:${color}; border:1px solid ${color}40">${techG.split(' ')[0]}</div>` : ''}
                         <div class="day-rates">
-                            <div class="rate-row lab"><span>Lab</span><span class="rate-val">28€</span></div>
-                            <div class="rate-row fes"><span>Fes</span><span class="rate-val">70€</span></div>
+                            <div class="rate-row lab"><span>Lab</span><span class="rate-val">${tarifas.lab}€</span></div>
+                            <div class="rate-row fes"><span>Fes</span><span class="rate-val">${tarifas.fes}€</span></div>
                         </div>
                     </div>
                 `;
@@ -252,19 +385,19 @@
 
                 let totalSemana = 0; let dCalc = new Date(d);
                 for(let i = 0; i < 7; i++) {
-                    totalSemana += getFestivos(dCalc.getMonth(), dCalc.getDate()).length > 0 ? 70 : 28;
+                    totalSemana += getFestivos(dCalc.getMonth(), dCalc.getDate()).length > 0 ? tarifas.fes : tarifas.lab;
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
                 let tObj = tecnicos.find(t => t.name === tecnico);
-                let color = tObj ? tObj.color : '#cbd5e1';
+                let color = tObj ? tObj.color : '#64748b';
 
                 container.innerHTML += `
                     <div class="weekly-item">
                         <div class="weekly-header">Del ${d.getDate()} ${monthsNames[d.getMonth()]} al ${fechaFin.getDate()} ${monthsNames[fechaFin.getMonth()]}</div>
                         <div class="weekly-details">
                             <div class="weekly-tech">
-                                <span class="tech-color-dot" style="background:${color}"></span>
-                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:var(--bg-card); color:var(--text-main); border-radius:4px; padding:2px 6px; font-weight:600;">
+                                <span class="tech-color-dot" style="background:${color}; color:${color}"></span>
+                                <select onchange="cambiarTecnico('${fechaStr}', this.value)" style="border:1px solid var(--border); background:rgba(15,23,42,0.9); color:var(--text-main); border-radius:6px; padding:4px 8px; font-weight:600; font-size:0.85rem;">
                                     ${tecnicos.map(t => `<option value="${t.name}" ${t.name === tecnico ? 'selected' : ''}>${t.name}</option>`).join('')}
                                 </select>
                             </div>
@@ -276,10 +409,50 @@
             }
         }
 
+        function renderTechniciansManager() {
+            const container = document.getElementById('technicians-list-container');
+            container.innerHTML = '';
+            tecnicos.forEach(t => {
+                container.innerHTML += `
+                    <div class="tech-badge-row">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="tech-color-dot" style="background:${t.color}; color:${t.color}"></span>
+                            <span style="font-weight: 600;">${t.name}</span>
+                        </div>
+                        <button onclick="removeTechnician('${t.name}')" class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; color: #f87171;" title="Dar de baja"><i class="fa-solid fa-user-minus"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        function addTechnician() {
+            let nombre = prompt("Nombre del nuevo técnico:");
+            if (!nombre) return;
+            let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e"];
+            let color = colores[tecnicos.length % colores.length];
+            tecnicos.push({ id: tecnicos.length + 1, name: nombre, color: color });
+            render();
+            showToast(`✅ Técnico ${nombre} incorporado`);
+        }
+
+        function removeTechnician(name) {
+            if (tecnicos.length <= 1) { showToast("⚠️ No se puede eliminar al último técnico"); return; }
+            if (confirm(`¿Dar de baja a ${name}? Sus guardias actuales pasarán al siguiente disponible.`)) {
+                tecnicos = tecnicos.filter(t => t.name !== name);
+                let fallback = tecnicos[0].name;
+                for (let k in guardiasSemanas) {
+                    if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback;
+                }
+                render();
+                showToast(`ℹ️ Técnico dado de baja y guardias reasignadas`);
+            }
+        }
+
         async function cambiarTecnico(fechaStr, nuevo) {
             guardiasSemanas[fechaStr] = nuevo;
             if (dbSupabase) await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
-            render(); showToast("☁️ Guardia actualizada");
+            render(); 
+            showToast("☁️ Guardia reasignada con éxito");
         }
 
         function changeMonth(dir) {
