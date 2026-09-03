@@ -116,11 +116,13 @@
         .sidebar-card h3 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         .sidebar-card h3 .title-left { display: flex; align-items: center; gap: 8px; }
         
-        /* Tooltip de Información */
+        /* Tooltip / Popup de Información Interactivo por Clic y Hover */
         .info-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
         .info-tooltip-container:hover { color: var(--accent); }
         .info-tooltip { position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid var(--accent); color: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: normal; width: 210px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; }
         .info-tooltip-container:hover .info-tooltip { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-2px); }
+        /* Clase añadida por JS para mostrar al hacer clic en pantallas táctiles */
+        .info-tooltip-container.active-tip .info-tooltip { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-2px); }
 
         .weekly-summary-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
         .weekly-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.2); }
@@ -250,7 +252,7 @@
                             <i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico
                         </h2>
                         <!-- Info Tooltip Calendario -->
-                        <div class="info-tooltip-container">
+                        <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                             <i class="fa-solid fa-circle-info"></i>
                             <div class="info-tooltip">Muestra visualmente qué técnico está asignado cada día del mes en curso, con indicadores de días festivos y tarifas aplicadas.</div>
                         </div>
@@ -277,7 +279,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-right-left text-cyan-400"></i> Intercambio (Trading)
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Permite solicitar o ejecutar un intercambio rápido de semanas de guardia entre dos técnicos de forma automatizada.</div>
                             </div>
@@ -305,7 +307,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-paper-plane text-emerald-400"></i> Alertas y Avisos
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Envía alertas automáticas por WhatsApp o Webhook al técnico que entra de guardia cada semana.</div>
                             </div>
@@ -325,7 +327,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-chart-pie text-amber-400"></i> Reparto Equitativo
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Porcentaje y total de semanas asignadas a cada técnico para asegurar un balance equitativo anual.</div>
                             </div>
@@ -339,7 +341,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Coste por día laboral y festivo aplicado automáticamente en el cálculo de cada semana de guardia.</div>
                             </div>
@@ -362,7 +364,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-users text-indigo-400"></i> Personal
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Directorio de técnicos activos registrados en el sistema de guardias.</div>
                             </div>
@@ -377,7 +379,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Listado cronológico de las semanas de guardia (Viernes a Viernes) y su coste económico total estimado.</div>
                             </div>
@@ -392,7 +394,7 @@
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-terminal text-cyan-400"></i> Actividad en Red
-                            <div class="info-tooltip-container">
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
                                 <div class="info-tooltip">Terminal de eventos y sincronización en tiempo real con la base de datos centralizada de Supabase.</div>
                             </div>
@@ -498,6 +500,21 @@
             "4-1": [{type: "nac", label: "Trabajo"}], "7-15": [{type: "nac", label: "Asunción"}], "9-9": [{type: "aut", label: "C. Valenciana"}],
             "9-12": [{type: "nac", label: "Fiesta Nacional"}], "10-1": [{type: "nac", label: "Todos los Santos"}], "11-25": [{type: "nac", label: "Navidad"}]
         };
+
+        // Función interactiva para mostrar/ocultar los tooltips con la "i" en móviles o clics
+        function toggleTooltip(event, element) {
+            event.stopPropagation();
+            // Cierra cualquier otro tooltip abierto
+            document.querySelectorAll('.info-tooltip-container').forEach(el => {
+                if (el !== element) el.classList.remove('active-tip');
+            });
+            element.classList.toggle('active-tip');
+        }
+
+        // Cierra los tooltips si haces clic fuera de ellos
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.info-tooltip-container').forEach(el => el.classList.remove('active-tip'));
+        });
 
         function playBeep(tipo = 'click') {
             try {
