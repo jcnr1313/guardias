@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Guardias • HUD Command Center V6</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Temas HUD / Sci-Fi */
@@ -64,11 +67,18 @@
         .net-dot.sync { background: #f59e0b; color: #f59e0b; }
         .net-dot.offline { background: #ef4444; color: #ef4444; }
 
-        /* Banner de Guardia Activa HUD */
-        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 18px 22px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; transition: opacity 0.3s; }
-        .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
-        .active-info { display: flex; align-items: center; gap: 15px; }
-        .active-avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-glow); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--accent); }
+        /* Contenedores de Guardias (Actual y Próximo) */
+        .guards-banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 768px) { .guards-banner-grid { grid-template-columns: 1fr; } }
+
+        .guard-status-card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .guard-status-card.active { border-color: var(--accent); box-shadow: 0 0 25px var(--accent-glow); }
+        .guard-status-card.active::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        .guard-status-card.next { border-color: rgba(250, 204, 21, 0.4); }
+        .guard-status-card.next::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #facc15; }
+
+        .active-info { display: flex; align-items: center; gap: 14px; }
+        .active-avatar { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         
         .dashboard-grid { display: grid; grid-template-columns: 1fr 400px; gap: 20px; align-items: start; }
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
@@ -145,7 +155,7 @@
 
         @media print {
             body { background: white; color: black; padding: 0; }
-            header, .sidebar, .header-actions, .active-guard-banner, #toast, .modal-overlay { display: none !important; }
+            header, .sidebar, .header-actions, .guards-banner-grid, #toast, .modal-overlay { display: none !important; }
             .card { border: none; box-shadow: none; background: white; padding: 0; }
             .calendar-grid { border: 1px solid #ccc; }
             .cal-cell { background: white; border: 1px solid #eee; min-height: 80px; }
@@ -156,22 +166,26 @@
 <body>
 
     <div class="main-container">
+        <!-- Cabecera -->
         <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <div class="w-12 h-12 p-1 rounded-xl bg-slate-900 border border-accent/40 flex items-center justify-center shadow-lg shadow-accent/20 animate-pulse-slow overflow-hidden shrink-0">
+                <!-- Logo Compacto -->
+                <div style="width: 38px; height: 38px;" class="p-1 rounded-xl bg-slate-900 border border-accent/40 flex items-center justify-center shadow-md shadow-accent/20 animate-pulse-slow overflow-hidden shrink-0">
                     <img src="logo.jpeg" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Cuadrante de Guardias</h1>
-                    <span style="font-size: 0.65rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">V6_HUD COMMAND CENTER</span>
+                    <h1 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Cuadrante de Guardias</h1>
+                    <span style="font-size: 0.6rem; padding: 1px 6px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">HUD V6</span>
                 </div>
             </div>
             <div class="header-actions">
+                <!-- Indicador de Red en Tiempo Real -->
                 <div class="network-status-badge" id="net-status-badge" title="Estado de la Sincronización en Directo">
                     <span class="net-dot online" id="net-dot"></span>
                     <span id="net-text" class="font-mono-custom">En Línea</span>
                 </div>
+                <!-- Selector de Temas -->
                 <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 7px 10px; font-weight: 600; width: auto;">
                     <option value="stark">Stark (Azul)</option>
                     <option value="cyberpunk">Cyberpunk</option>
@@ -181,31 +195,52 @@
                 <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo</button>
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                    <span id="current-month-label" style="min-width: 155px; text-align: center;" class="font-mono-custom text-sm"></span>
+                    <span id="current-month-label" style="min-width: 150px; text-align: center;" class="font-mono-custom text-sm"></span>
                     <button class="btn btn-secondary" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
         </header>
 
-        <div class="active-guard-banner" id="active-guard-container">
-            <div class="active-info">
-                <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <div>
-                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-0.5" style="color: var(--accent);" id="active-banner-subtitle">Técnico en Servicio Activo</span>
-                    <h2 class="text-base font-bold text-white" id="active-tech-name">Sincronizando...</h2>
+        <!-- Bloque de Guardias (Actual y Próximo) -->
+        <div class="guards-banner-grid">
+            <!-- Guardia Activa -->
+            <div class="guard-status-card active" id="active-guard-container">
+                <div class="active-info">
+                    <div class="active-avatar" id="active-tech-icon" style="color: var(--accent);"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <span class="text-xs font-mono-custom uppercase tracking-widest block mb-0.5" style="color: var(--accent);">Técnico en Servicio Activo</span>
+                        <h2 class="text-base font-bold text-white" id="active-tech-name">Sincronizando...</h2>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
+                    <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Activo</span>
                 </div>
             </div>
-            <div class="text-right">
-                <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
-                <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado</span>
+
+            <!-- Próxima Guardia -->
+            <div class="guard-status-card next" id="next-guard-container">
+                <div class="active-info">
+                    <div class="active-avatar" id="next-tech-icon" style="color: #facc15;"><i class="fa-solid fa-user-clock"></i></div>
+                    <div>
+                        <span class="text-xs font-mono-custom uppercase tracking-widest block mb-0.5" style="color: #facc15;">Próximo en Entrar</span>
+                        <h2 class="text-base font-bold text-white" id="next-tech-name">Sincronizando...</h2>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block font-mono-custom" id="next-guard-dates">-- / --</span>
+                    <span class="text-xs text-amber-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Siguiente</span>
+                </div>
             </div>
         </div>
 
         <div class="dashboard-grid">
+            <!-- Calendario Principal -->
             <div class="card calendar-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico</h2>
+                        <!-- Filtro Rápido por Técnico -->
                         <select id="filter-tech-select" onchange="render()" class="config-input" style="padding: 4px 8px; width: auto; font-size: 0.75rem;">
                             <option value="all">Filtro: Todos</option>
                         </select>
@@ -221,7 +256,9 @@
                 </div>
             </div>
 
+            <!-- Panel Lateral de Control -->
             <aside class="sidebar">
+                <!-- Estadísticas y Reparto Equitativo -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-chart-pie text-amber-400"></i> Reparto Equitativo</span>
@@ -233,6 +270,7 @@
                     <div class="stats-grid" id="stats-grid-container"></div>
                 </div>
 
+                <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas</span>
@@ -253,6 +291,7 @@
                     </div>
                 </div>
 
+                <!-- Gestión de Técnicos -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
@@ -261,6 +300,7 @@
                     <div class="technicians-list" id="technicians-list-container"></div>
                 </div>
 
+                <!-- Resumen Semanal -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales</span>
@@ -269,6 +309,7 @@
                     <div class="weekly-summary-list" id="weekly-summary"></div>
                 </div>
 
+                <!-- Log de Auditoría en Tiempo Real -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left"><i class="fa-solid fa-terminal text-cyan-400"></i> Actividad en Red</span>
@@ -282,6 +323,7 @@
         </div>
     </div>
 
+    <!-- Modales -->
     <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
@@ -519,29 +561,44 @@
 
         function render() {
             document.getElementById('current-month-label').innerText = `${monthsNames[currentMonth].toUpperCase()} ${currentYear}`;
-            renderActiveGuardBanner();
+            renderActiveGuardBanners();
             renderCalendar();
             renderWeekly();
             renderTechniciansManager();
             renderStats();
         }
 
-        function renderActiveGuardBanner() {
+        function renderActiveGuardBanners() {
             let today = new Date();
             let dCheck = new Date(today);
             while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
             let fechaStr = dCheck.toISOString().split('T')[0];
             
             let tecnicoActual = guardiasSemanas[fechaStr] || "Sin asignar";
-            let fechaFin = new Date(dCheck); fechaFin.setDate(fechaFin.getDate() + 7);
+            let fechaFinAct = new Date(dCheck); fechaFinAct.setDate(fechaFinAct.getDate() + 7);
 
-            let tObj = tecnicos.find(t => t.name === tecnicoActual);
-            let color = tObj ? tObj.color : '#3b82f6';
+            let tObjAct = tecnicos.find(t => t.name === tecnicoActual);
+            let colorAct = tObjAct ? tObjAct.color : '#3b82f6';
 
             document.getElementById('active-tech-name').innerText = tecnicoActual;
-            document.getElementById('active-tech-name').style.color = color;
-            document.getElementById('active-tech-icon').style.color = color;
-            document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1}`;
+            document.getElementById('active-tech-name').style.color = colorAct;
+            document.getElementById('active-tech-icon').style.color = colorAct;
+            document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFinAct.getDate()}/${fechaFinAct.getMonth()+1}`;
+
+            // Siguiente Guardia (próximo viernes)
+            let dNext = new Date(dCheck);
+            dNext.setDate(dNext.getDate() + 7);
+            let fechaNextStr = dNext.toISOString().split('T')[0];
+            let tecnicoSiguiente = guardiasSemanas[fechaNextStr] || "Sin asignar";
+            let fechaFinNext = new Date(dNext); fechaFinNext.setDate(fechaFinNext.getDate() + 7);
+
+            let tObjNext = tecnicos.find(t => t.name === tecnicoSiguiente);
+            let colorNext = tObjNext ? tObjNext.color : '#facc15';
+
+            document.getElementById('next-tech-name').innerText = tecnicoSiguiente;
+            document.getElementById('next-tech-name').style.color = colorNext;
+            document.getElementById('next-tech-icon').style.color = colorNext;
+            document.getElementById('next-guard-dates').innerText = `Del ${dNext.getDate()}/${dNext.getMonth()+1} al ${fechaFinNext.getDate()}/${fechaFinNext.getMonth()+1}`;
         }
 
         function renderCalendar() {
