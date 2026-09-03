@@ -56,7 +56,7 @@
         .month-nav { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; }
 
         /* Banner de Guardia Activa HUD */
-        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; }
+        .active-guard-banner { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 20px 25px; box-shadow: 0 0 25px var(--accent-glow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; overflow: hidden; transition: opacity 0.3s; }
         .active-guard-banner::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
         .active-info { display: flex; align-items: center; gap: 15px; }
         .active-avatar { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-glow); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent); }
@@ -110,14 +110,14 @@
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .config-field { display: flex; flex-direction: column; gap: 4px; }
         .config-field label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-        .config-input { background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text-main); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+        .config-input { background: var(--bg-app); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text-main); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; width: 100%; }
 
         .technicians-list { display: flex; flex-direction: column; gap: 8px; }
         .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
 
-        /* Modal Épico */
-        #modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        #modal-overlay.show { opacity: 1; pointer-events: auto; }
+        /* Modal Épico / Generales */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--bg-card); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 0 40px var(--accent-glow); text-align: center; }
         
         #toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card); border: 1px solid var(--accent); color: var(--text-main); padding: 12px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-weight: 600; font-size: 0.85rem; z-index: 4000; transform: translateY(100px); opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); }
@@ -131,11 +131,11 @@
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">HUD_V4</span></h1>
+                <h1>🛡️ Cuadrante de Guardias <span style="font-size: 0.7rem; padding: 2px 8px; background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 20px; color: var(--accent);" class="font-mono-custom">HUD_V5</span></h1>
             </div>
             <div class="header-actions">
                 <!-- Selector de Temas HUD -->
-                <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 8px 12px; font-weight: 600;">
+                <select id="theme-selector" onchange="cambiarTemaHUD(this.value)" class="config-input" style="padding: 8px 12px; font-weight: 600; width: auto;">
                     <option value="stark">Stark Tech (Azul)</option>
                     <option value="cyberpunk">Cyberpunk (Neón)</option>
                     <option value="matrix">Matrix (Verde)</option>
@@ -154,7 +154,7 @@
             <div class="active-info">
                 <div class="active-avatar" id="active-tech-icon"><i class="fa-solid fa-shield-halved"></i></div>
                 <div>
-                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-1" style="color: var(--accent);">Técnico en Servicio Activo</span>
+                    <span class="text-xs font-mono-custom uppercase tracking-widest block mb-1" style="color: var(--accent);" id="active-banner-subtitle">Técnico en Servicio Activo</span>
                     <h2 class="text-lg font-bold text-white" id="active-tech-name">Sincronizando...</h2>
                 </div>
             </div>
@@ -207,7 +207,7 @@
                 <div class="card sidebar-card">
                     <h3>
                         <span><i class="fa-solid fa-users text-indigo-400"></i> Personal</span>
-                        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="addTechnician()"><i class="fa-solid fa-plus"></i> Añadir</button>
+                        <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="abrirModalTech()"><i class="fa-solid fa-plus"></i> Añadir</button>
                     </h3>
                     <div class="technicians-list" id="technicians-list-container"></div>
                 </div>
@@ -221,8 +221,8 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmación -->
-    <div id="modal-overlay">
+    <!-- Modal de Confirmación de Cuadrante -->
+    <div id="modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -232,6 +232,22 @@
             <div class="flex gap-3 justify-center">
                 <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()">Cancelar</button>
                 <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Interactivo para Añadir Técnico -->
+    <div id="modal-tech" class="modal-overlay">
+        <div class="modal-box">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Añadir Nuevo Técnico</h3>
+            <p class="text-xs text-slate-400 mb-4">Introduce el nombre del operador para integrarlo en la red de guardias.</p>
+            <input type="text" id="input-new-tech-name" placeholder="Nombre y apellidos..." class="config-input mb-6" style="padding: 10px; font-family: 'Inter', sans-serif;">
+            <div class="flex gap-3 justify-center">
+                <button class="btn btn-secondary" onclick="cerrarModalTech()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarNuevoTecnico()">Registrar</button>
             </div>
         </div>
     </div>
@@ -305,6 +321,18 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
+        function toggleLoading(show) {
+            let banner = document.getElementById('active-guard-container');
+            let subtitle = document.getElementById('active-banner-subtitle');
+            if (show) {
+                banner.style.opacity = '0.6';
+                subtitle.innerText = 'Sincronizando red...';
+            } else {
+                banner.style.opacity = '1';
+                subtitle.innerText = 'Técnico en Servicio Activo';
+            }
+        }
+
         function getFestivos(m, d) {
             let f = []; const dayW = new Date(currentYear, m, d).getDay();
             if (dayW === 0 || dayW === 6) f.push({ type: "fin", label: "Fin de semana" });
@@ -314,10 +342,29 @@
 
         async function init() {
             if (dbSupabase) {
-                let { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
-                if (guardData && guardData.length > 0) {
-                    guardiasSemanas = {};
-                    guardData.forEach(r => guardiasSemanas[r.fecha_inicio] = r.tecnico);
+                try {
+                    toggleLoading(true);
+                    let { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
+                    if (guardData && guardData.length > 0) {
+                        guardiasSemanas = {};
+                        guardData.forEach(r => guardiasSemanas[r.fecha_inicio] = r.tecnico);
+                    }
+
+                    // Sincronización extendida robusta para técnicos y tarifas (si existen tablas en Supabase)
+                    let { data: techData } = await dbSupabase.from('tecnicos').select('*');
+                    if (techData && techData.length > 0) tecnicos = techData;
+
+                    let { data: configData } = await dbSupabase.from('configuracion').select('*').eq('key', 'tarifas').maybeSingle();
+                    if (configData && configData.value) {
+                        tarifas = configData.value;
+                        document.getElementById('rate-lab').value = tarifas.lab;
+                        document.getElementById('rate-fes').value = tarifas.fes;
+                    }
+                } catch(err) {
+                    console.error("Error conectando con Supabase:", err);
+                    showToast("⚠️ Modo local activado (Error de red)");
+                } finally {
+                    toggleLoading(false);
                 }
             }
             if (Object.keys(guardiasSemanas).length === 0) guardiasSemanas = { ...cuadranteOficial2026 };
@@ -326,6 +373,14 @@
 
         function abrirModalConfirmacion() { playBeep('click'); document.getElementById('modal-overlay').classList.add('show'); }
         function cerrarModalConfirmacion() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+        function abrirModalTech() { 
+            playBeep('click'); 
+            document.getElementById('input-new-tech-name').value = '';
+            document.getElementById('modal-tech').classList.add('show'); 
+            document.getElementById('input-new-tech-name').focus();
+        }
+        function cerrarModalTech() { document.getElementById('modal-tech').classList.remove('show'); }
 
         async function ejecutarGeneracionAnual() {
             cerrarModalConfirmacion();
@@ -341,17 +396,30 @@
             });
 
             if (dbSupabase) {
-                let rows = Object.keys(guardiasSemanas).map(k => ({ fecha_inicio: k, tecnico: guardiasSemanas[k] }));
-                await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
+                try {
+                    toggleLoading(true);
+                    let rows = Object.keys(guardiasSemanas).map(k => ({ fecha_inicio: k, tecnico: guardiasSemanas[k] }));
+                    await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
+                } catch(e) {
+                    showToast("⚠️ Error al sincronizar nuevo cuadrante en nube");
+                } finally {
+                    toggleLoading(false);
+                }
             }
             render();
             showToast("✨ Nuevo cuadrante generado con rotación equitativa");
         }
 
-        function actualizarTarifas() {
+        async function actualizarTarifas() {
             tarifas.lab = parseFloat(document.getElementById('rate-lab').value) || 0;
             tarifas.fes = parseFloat(document.getElementById('rate-fes').value) || 0;
             playBeep('click');
+            
+            if (dbSupabase) {
+                try {
+                    await dbSupabase.from('configuracion').upsert({ key: 'tarifas', value: tarifas }, { onConflict: ['key'] });
+                } catch(e) {}
+            }
             render();
             showToast("💰 Tarifas actualizadas");
         }
@@ -380,6 +448,7 @@
             document.getElementById('active-tech-name').innerText = tecnicoActual;
             document.getElementById('active-tech-name').style.color = color;
             document.getElementById('active-tech-icon').style.color = color;
+            document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1}`;
         }
 
         function renderCalendar() {
@@ -506,23 +575,47 @@
             });
         }
 
-        function addTechnician() {
-            let nombre = prompt("Nombre del nuevo técnico:");
-            if (!nombre) return;
-            let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e"];
+        async function guardarNuevoTecnico() {
+            let nombre = document.getElementById('input-new-tech-name').value.trim();
+            if (!nombre) {
+                showToast("⚠️ Introduce un nombre válido");
+                return;
+            }
+            if (tecnicos.some(t => t.name.toLowerCase() === nombre.toLowerCase())) {
+                showToast("⚠️ Este técnico ya existe");
+                return;
+            }
+            
+            let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e", "#06b6d4"];
             let color = colores[tecnicos.length % colores.length];
-            tecnicos.push({ id: tecnicos.length + 1, name: nombre, color: color });
+            let nuevoTech = { id: tecnicos.length + 1, name: nombre, color: color };
+            tecnicos.push(nuevoTech);
+
+            if (dbSupabase) {
+                try {
+                    await dbSupabase.from('tecnicos').upsert(nuevoTech, { onConflict: ['name'] });
+                } catch(e) {}
+            }
+
+            cerrarModalTech();
             playBeep('success');
             render();
             showToast(`✅ Técnico ${nombre} incorporado`);
         }
 
-        function removeTechnician(name) {
+        async function removeTechnician(name) {
             if (tecnicos.length <= 1) { showToast("⚠️ No se puede eliminar al último técnico"); return; }
             if (confirm(`¿Dar de baja a ${name}?`)) {
                 tecnicos = tecnicos.filter(t => t.name !== name);
                 let fallback = tecnicos[0].name;
                 for (let k in guardiasSemanas) { if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback; }
+                
+                if (dbSupabase) {
+                    try {
+                        await dbSupabase.from('tecnicos').delete().eq('name', name);
+                    } catch(e) {}
+                }
+
                 playBeep('click');
                 render();
                 showToast(`ℹ️ Técnico dado de baja`);
@@ -532,7 +625,16 @@
         async function cambiarTecnico(fechaStr, nuevo) {
             guardiasSemanas[fechaStr] = nuevo;
             playBeep('success');
-            if (dbSupabase) await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
+            if (dbSupabase) {
+                try {
+                    toggleLoading(true);
+                    await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
+                } catch(e) {
+                    showToast("⚠️ Error al sincronizar cambio en nube");
+                } finally {
+                    toggleLoading(false);
+                }
+            }
             render(); 
             showToast("☁️ Guardia reasignada con éxito");
         }
