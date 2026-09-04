@@ -39,7 +39,7 @@
         .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-app); color: var(--text-main); padding: 20px; min-height: 100vh; position: relative; overflow-x: hidden; }
+        body { background-color: var(--bg-app); color: var(--text-main); padding: 20px; min-height: 100vh; position: relative; }
         
         body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%); opacity: 0.15; pointer-events: none; z-index: -1; }
 
@@ -57,7 +57,6 @@
         .btn-danger:hover { transform: translateY(-1px); }
         .btn-secondary { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border); color: var(--text-main); backdrop-filter: blur(8px); }
         .btn-secondary:hover { background: rgba(51, 65, 85, 0.8); border-color: var(--accent); }
-        .btn-sos { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
         
         .month-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1rem; }
 
@@ -72,8 +71,7 @@
         .guards-banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 768px) { .guards-banner-grid { grid-template-columns: 1fr; } }
 
-        .guard-status-card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
-        .guard-status-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .guard-status-card { background: var(--bg-card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; transition: transform 0.2s; }
         .guard-status-card.active { border-color: var(--accent); box-shadow: 0 0 25px var(--accent-glow); }
         .guard-status-card.active::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
         .guard-status-card.next { border-color: rgba(250, 204, 21, 0.4); }
@@ -86,27 +84,27 @@
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
         
         .card { background: var(--bg-card); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .calendar-card { overflow-x: auto; }
+        .calendar-card { width: 100%; }
         .calendar-legend { display: flex; gap: 12px; font-size: 0.75rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         
-        /* Calendario adaptativo para móviles y PC */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(85px, 1fr)); gap: 3px; background: var(--border); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
-        .cal-header { text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); padding: 10px 4px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
-        .cal-cell { background: var(--bg-app); min-height: 100px; padding: 8px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
+        /* Calendario adaptativo y completamente visible (solucionado el desbordamiento) */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: var(--border); border-radius: var(--radius-md); border: 1px solid var(--border); width: 100%; }
+        .cal-header { text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); padding: 10px 2px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
+        .cal-cell { background: var(--bg-app); min-height: 85px; padding: 6px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; overflow: hidden; }
         .cal-cell:hover { background: rgba(255, 255, 255, 0.03); }
         .cal-cell.other-month { opacity: 0.3; }
         .cal-cell.dimmed { opacity: 0.25; filter: grayscale(50%); }
         
         .day-header-row { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; }
-        .day-num { font-weight: 700; font-size: 0.9rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
+        .day-num { font-weight: 700; font-size: 0.85rem; line-height: 1; font-family: 'JetBrains Mono', monospace; }
         .cal-cell.is-festivo .day-num { color: #f87171; }
         .fest-icons { display: flex; gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
         .fest-icon { font-size: 0.5rem; font-weight: bold; padding: 2px 4px; border-radius: 3px; color: white; letter-spacing: 0.05em; }
         .fest-nac { background-color: #dc2626; } .fest-aut { background-color: #ea580c; } .fest-loc { background-color: #9333ea; }
         
-        .guardia-banner { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 3px 5px; border-radius: 5px; text-align: center; margin: 4px 0; z-index: 2; letter-spacing: 0.03em; backdrop-filter: blur(4px); }
-        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.6rem; color: var(--text-muted); z-index: 2; margin-top: auto; font-family: 'JetBrains Mono', monospace; }
+        .guardia-banner { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 2px 4px; border-radius: 4px; text-align: center; margin: 3px 0; z-index: 2; letter-spacing: 0.02em; backdrop-filter: blur(4px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .day-rates { display: flex; flex-direction: column; gap: 1px; font-size: 0.58rem; color: var(--text-muted); z-index: 2; margin-top: auto; font-family: 'JetBrains Mono', monospace; }
         .rate-row { display: flex; justify-content: space-between; }
         .rate-val { font-weight: 600; }
         .cal-cell.is-festivo .rate-row.lab { text-decoration: line-through; opacity: 0.4; }
@@ -121,7 +119,6 @@
         .info-tooltip-container:hover { color: var(--accent); }
         .info-tooltip { position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid var(--accent); color: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: normal; width: 210px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; }
         .info-tooltip-container:hover .info-tooltip { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-2px); }
-        /* Clase añadida por JS para mostrar al hacer clic en pantallas táctiles */
         .info-tooltip-container.active-tip .info-tooltip { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-2px); }
 
         .weekly-summary-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
@@ -162,7 +159,7 @@
             header, .sidebar, .header-actions, .guards-banner-grid, #toast, .modal-overlay { display: none !important; }
             .card { border: none; box-shadow: none; background: white; padding: 0; }
             .calendar-grid { border: 1px solid #ccc; }
-            .cal-cell { background: white; border: 1px solid #eee; min-height: 80px; }
+            .cal-cell { background: white; border: 1px solid #eee; min-height: 70px; }
             .day-num { color: black; }
         }
     </style>
@@ -174,7 +171,7 @@
         <header>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <!-- Logo con Tamaño Equilibrado (Ajustado a 72px x 38px) -->
+                <!-- Logo con Tamaño Equilibrado -->
                 <div style="width: 72px; height: 38px; min-width: 72px; min-height: 38px;" class="px-2 py-1 rounded-xl bg-slate-900 border border-accent/40 flex items-center justify-center shadow-md shadow-accent/20 animate-pulse-slow overflow-hidden shrink-0">
                     <img src="logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; display: block;">
                 </div>
@@ -184,8 +181,6 @@
                 </div>
             </div>
             <div class="header-actions">
-                <!-- Botón SOS Emergencia -->
-                <button class="btn btn-sos" onclick="abrirModalSOS()" title="Contacto de Emergencia / Técnico Actual"><i class="fa-solid fa-phone-volume"></i> SOS</button>
                 <!-- Indicador de Red en Tiempo Real -->
                 <div class="network-status-badge" id="net-status-badge" title="Estado de la Sincronización en Directo">
                     <span class="net-dot online" id="net-dot"></span>
@@ -213,7 +208,7 @@
         <!-- Bloque de Guardias (Actual y Próximo) -->
         <div class="guards-banner-grid">
             <!-- Guardia Activa -->
-            <div class="guard-status-card active" id="active-guard-container" onclick="abrirModalSOS()">
+            <div class="guard-status-card active" id="active-guard-container">
                 <div class="active-info">
                     <div class="active-avatar" id="active-tech-icon" style="color: var(--accent);"><i class="fa-solid fa-shield-halved"></i></div>
                     <div>
@@ -223,7 +218,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-mono-custom" id="active-guard-dates">-- / --</span>
-                    <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Activo (Click SOS)</span>
+                    <span class="text-xs text-emerald-400 font-semibold font-mono-custom flex items-center gap-1 justify-end mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Activo</span>
                 </div>
             </div>
 
@@ -302,23 +297,23 @@
                     </div>
                 </div>
 
-                <!-- Notificaciones Automáticas -->
+                <!-- Notificaciones Automáticas (Mensaje Recordatorio con Importe Automático) -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-paper-plane text-emerald-400"></i> Alertas y Avisos
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Envía alertas automáticas por WhatsApp o Webhook al técnico que entra de guardia cada semana.</div>
+                                <div class="info-tooltip">Envía un recordatorio de guardia al técnico con el importe calculado según los festivos de la semana.</div>
                             </div>
                         </span>
                     </h3>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div class="config-field">
-                            <label>Teléfono / Canal de Aviso</label>
+                            <label>Teléfono de Contacto</label>
                             <input type="text" id="alert-phone" value="+34 600 000 000" class="config-input">
                         </div>
-                        <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.78rem;" onclick="enviarAlertaWhatsApp()"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Enviar Alerta de Guardia Activa</button>
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.78rem;" onclick="enviarAlertaWhatsApp()"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Enviar Recordatorio de Guardia</button>
                     </div>
                 </div>
 
@@ -424,26 +419,6 @@
         </div>
     </div>
 
-    <!-- Modal SOS / Guardia Activa -->
-    <div id="modal-sos" class="modal-overlay">
-        <div class="modal-box" style="border-color: #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-3 text-xl animate-bounce">
-                <i class="fa-solid fa-phone-volume"></i>
-            </div>
-            <span class="text-xs font-mono-custom text-amber-400 uppercase tracking-widest block mb-1">Panel de Emergencia SOS</span>
-            <h3 class="text-lg font-bold text-white mb-2" id="sos-tech-name">Cargando...</h3>
-            <p class="text-xs text-slate-300 mb-4" id="sos-tech-dates">-- / --</p>
-            <div class="bg-slate-900/80 border border-amber-500/30 rounded-xl p-3 mb-5 text-left text-xs font-mono-custom flex flex-col gap-2">
-                <div class="flex justify-between"><span>Estado:</span> <span class="text-emerald-400">En Servicio 24h</span></div>
-                <div class="flex justify-between"><span>Canal Principal:</span> <span class="text-amber-400">Línea Directa / Red</span></div>
-            </div>
-            <div class="flex gap-3 justify-center">
-                <button class="btn btn-secondary" onclick="cerrarModalSOS()">Cerrar</button>
-                <a id="sos-whatsapp-btn" href="#" target="_blank" class="btn btn-sos"><i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-tech" class="modal-overlay">
         <div class="modal-box">
             <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 mx-auto mb-4 text-xl">
@@ -501,17 +476,14 @@
             "9-12": [{type: "nac", label: "Fiesta Nacional"}], "10-1": [{type: "nac", label: "Todos los Santos"}], "11-25": [{type: "nac", label: "Navidad"}]
         };
 
-        // Función interactiva para mostrar/ocultar los tooltips con la "i" en móviles o clics
         function toggleTooltip(event, element) {
             event.stopPropagation();
-            // Cierra cualquier otro tooltip abierto
             document.querySelectorAll('.info-tooltip-container').forEach(el => {
                 if (el !== element) el.classList.remove('active-tip');
             });
             element.classList.toggle('active-tip');
         }
 
-        // Cierra los tooltips si haces clic fuera de ellos
         document.addEventListener('click', () => {
             document.querySelectorAll('.info-tooltip-container').forEach(el => el.classList.remove('active-tip'));
         });
@@ -643,22 +615,6 @@
         function abrirModalConfirmacion() { playBeep('click'); document.getElementById('modal-overlay').classList.add('show'); }
         function cerrarModalConfirmacion() { document.getElementById('modal-overlay').classList.remove('show'); }
 
-        function abrirModalSOS() {
-            playBeep('click');
-            let today = new Date();
-            let dCheck = new Date(today);
-            while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
-            let fechaStr = dCheck.toISOString().split('T')[0];
-            let tecnicoActual = guardiasSemanas[fechaStr] || "Sin asignar";
-            let fechaFinAct = new Date(dCheck); fechaFinAct.setDate(fechaFinAct.getDate() + 7);
-
-            document.getElementById('sos-tech-name').innerText = tecnicoActual;
-            document.getElementById('sos-tech-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFinAct.getDate()}/${fechaFinAct.getMonth()+1}`;
-            document.getElementById('sos-whatsapp-btn').href = `https://wa.me/?text=Hola%20${encodeURIComponent(tecnicoActual)},%20te%20contacto%20desde%20el%20Command%20Center%20por%20una%20emergencia%20de%20guardia.`;
-            document.getElementById('modal-sos').classList.add('show');
-        }
-        function cerrarModalSOS() { document.getElementById('modal-sos').classList.remove('show'); }
-
         function abrirModalTech() { 
             playBeep('click'); 
             document.getElementById('input-new-tech-name').value = '';
@@ -734,7 +690,6 @@
             document.getElementById('active-tech-icon').style.color = colorAct;
             document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFinAct.getDate()}/${fechaFinAct.getMonth()+1}`;
 
-            // Siguiente Guardia (próximo viernes)
             let dNext = new Date(dCheck);
             dNext.setDate(dNext.getDate() + 7);
             let fechaNextStr = dNext.toISOString().split('T')[0];
@@ -950,17 +905,26 @@
         }
 
         function enviarAlertaWhatsApp() {
-            let telefono = document.getElementById('alert-phone').value;
             let today = new Date();
             let dCheck = new Date(today);
             while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
             let fechaStr = dCheck.toISOString().split('T')[0];
             let tecnicoActual = guardiasSemanas[fechaStr] || "Técnico";
             
-            let mensaje = `🚨 Hola ${tecnicoActual}, se te recuerda que estás de guardia activa en el Command Center HUD V7 Pro. Teléfono de aviso: ${telefono}`;
+            let totalSemana = 0; 
+            let dCalc = new Date(dCheck);
+            for(let i = 0; i < 7; i++) {
+                totalSemana += getFestivos(dCalc.getMonth(), dCalc.getDate()).length > 0 ? tarifas.fes : tarifas.lab;
+                dCalc.setDate(dCalc.getDate() + 1);
+            }
+            
+            let fechaFin = new Date(dCheck); 
+            fechaFin.setDate(fechaFin.getDate() + 7);
+
+            let mensaje = `Hola ${tecnicoActual}, te recordamos que tienes guardia esta semana (del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1}). El importe total estimado para esta semana es de ${totalSemana} €.`;
             window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
-            showToast("📤 Redirigiendo a pasarela WhatsApp para aviso");
-            logAudit(`Alerta de guardia enviada a ${tecnicoActual}`);
+            showToast("📤 Redirigiendo a WhatsApp con el recordatorio");
+            logAudit(`Recordatorio de guardia enviado a ${tecnicoActual}`);
         }
 
         function exportarExcel() {
