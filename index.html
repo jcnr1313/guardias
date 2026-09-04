@@ -185,10 +185,33 @@
                     <option value="cyberpunk">Cyberpunk</option>
                     <option value="matrix">Matrix (Verde)</option>
                 </select>
-                <!-- Botones de Exportación -->
-                <button class="btn btn-secondary" onclick="exportarExcel()" title="Exportar Cuadrante a Excel (.csv)"><i class="fa-solid fa-file-excel text-emerald-400"></i> Excel</button>
-                <button class="btn btn-secondary" onclick="sincronizarICal()" title="Sincronizar con Calendario iCal"><i class="fa-solid fa-calendar-arrow-down text-cyan-400"></i> iCal</button>
-                <button class="btn btn-secondary" onclick="window.print()" title="Imprimir / Exportar PDF"><i class="fa-solid fa-print"></i></button>
+
+                <!-- Botón Excel con Info -->
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <button class="btn btn-secondary" onclick="exportarExcel()"><i class="fa-solid fa-file-excel text-emerald-400"></i> Excel</button>
+                    <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div class="info-tooltip">Exporta el cuadrante completo del año visualizado en formato hoja de cálculo (.csv).</div>
+                    </div>
+                </div>
+
+                <!-- Botón iCal con Info -->
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <button class="btn btn-secondary" onclick="sincronizarICal()"><i class="fa-solid fa-calendar-arrow-down text-cyan-400"></i> iCal</button>
+                    <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div class="info-tooltip">Genera un archivo compatible (.ics) para importar y sincronizar las guardias con tu calendario digital (Google, Apple, Outlook).</div>
+                    </div>
+                </div>
+
+                <!-- Botón Imprimir con Info -->
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i></button>
+                    <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div class="info-tooltip">Abre el diálogo del sistema para imprimir en papel o guardar el cuadrante actual directamente en formato PDF.</div>
+                    </div>
+                </div>
                 
                 <!-- Botón Generar Cuadrante Anual Nuevo con Seguridad y Tooltip -->
                 <div style="display: flex; align-items: center; gap: 4px;">
@@ -614,7 +637,6 @@
         }
         function cerrarModalTech() { document.getElementById('modal-tech').classList.remove('show'); }
 
-        // Algoritmo de Generación Anual con Rueda Inteligente de Festivos
         async function ejecutarGeneracionAnual() {
             cerrarModalConfirmacion();
             playBeep('success');
@@ -622,13 +644,11 @@
             let techNames = tecnicos.map(t => t.name);
             let prevYear = currentYear - 1;
 
-            // Analizar quién hizo el último festivo importante de Navidad/Año Nuevo del año anterior para desplazar la rueda
             let lastHolidayTechIndex = 0;
             let claveNavidadAnterior = `${prevYear}-12-25`;
             if (guardiasSemanas[claveNavidadAnterior]) {
                 let idxEncontrado = techNames.indexOf(guardiasSemanas[claveNavidadAnterior]);
                 if (idxEncontrado !== -1) {
-                    // Desplazamos para que el siguiente empiece el nuevo año
                     lastHolidayTechIndex = (idxEncontrado + 1) % techNames.length;
                 } else {
                     lastHolidayTechIndex = Math.floor(Math.random() * techNames.length);
@@ -637,7 +657,6 @@
                 lastHolidayTechIndex = Math.floor(Math.random() * techNames.length);
             }
 
-            // Generar todos los viernes del año en curso
             let dIter = new Date(currentYear, 0, 1);
             while (dIter.getDay() !== 5) {
                 dIter.setDate(dIter.getDate() + 1);
@@ -653,7 +672,6 @@
                 dIter.setDate(dIter.getDate() + 7);
             }
 
-            // Fusionar con las guardias ya existentes o reemplazar las de este año
             Object.keys(guardiasSemanas).forEach(k => {
                 if (!k.startsWith(currentYear.toString())) {
                     nuevoCuadranteAnual[k] = guardiasSemanas[k];
@@ -840,7 +858,6 @@
             tecnicos.forEach(t => conteo[t.name] = 0);
             let totalGuards = 0;
             
-            // Contabilizar solo el año activo actual para las estadísticas
             for (let k in guardiasSemanas) {
                 if (k.startsWith(currentYear.toString())) {
                     let tech = guardiasSemanas[k];
