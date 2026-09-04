@@ -88,7 +88,7 @@
         .calendar-legend { display: flex; gap: 12px; font-size: 0.75rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         
-        /* Calendario adaptativo y completamente visible (solucionado el desbordamiento) */
+        /* Calendario adaptativo y completamente visible */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: var(--border); border-radius: var(--radius-md); border: 1px solid var(--border); width: 100%; }
         .cal-header { text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); padding: 10px 2px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
         .cal-cell { background: var(--bg-app); min-height: 85px; padding: 6px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; overflow: hidden; }
@@ -196,7 +196,16 @@
                 <button class="btn btn-secondary" onclick="exportarExcel()" title="Exportar Cuadrante a Excel (.csv)"><i class="fa-solid fa-file-excel text-emerald-400"></i> Excel</button>
                 <button class="btn btn-secondary" onclick="sincronizarICal()" title="Sincronizar con Calendario iCal"><i class="fa-solid fa-calendar-arrow-down text-cyan-400"></i> iCal</button>
                 <button class="btn btn-secondary" onclick="window.print()" title="Imprimir / Exportar PDF"><i class="fa-solid fa-print"></i></button>
-                <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo</button>
+                
+                <!-- Botón Nuevo con Tooltip Informativo Integrado -->
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo</button>
+                    <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div class="info-tooltip">Genera un nuevo cuadrante anual redistribuyendo de forma equitativa y automática las semanas entre los técnicos activos.</div>
+                    </div>
+                </div>
+
                 <div class="month-nav">
                     <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
                     <span id="current-month-label" style="min-width: 150px; text-align: center;" class="font-mono-custom text-sm"></span>
