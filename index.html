@@ -457,7 +457,7 @@
         try { dbSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) {}
 
         let currentYear = 2026;
-        let currentMonth = 8;
+        let currentMonth = 8; // Septiembre
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         let tarifas = { lab: 28, fes: 70 };
@@ -469,7 +469,6 @@
         ];
         let guardiasSemanas = {};
 
-        // Cuadrante oficial extraído exactamente de tu imagen subida (Enero a Diciembre 2026)
         const cuadranteOficial2026 = {
             // Enero
             "2026-01-02": "J.Carlos", "2026-01-09": "Óscar Ibarreta", "2026-01-16": "Lucas", "2026-01-23": "Óscar Ibañez",
@@ -486,8 +485,8 @@
             // Julio
             "2026-06-26": "Óscar Ibarreta", "2026-07-03": "Lucas", "2026-07-10": "Óscar Ibarreta", "2026-07-17": "J.Carlos", "2026-07-24": "Óscar Ibañez",
             // Agosto
-            "2026-07-31": "J.Carlos", "2026-08-07": "Óscar Ibañez", "2026-08-14": "Lucas", "2026-08-21": "Óscar Ibarreta", "2026-08-28": "Lucas",
-            // Septiembre (actualizado con los datos de tu imagen)
+            "2026-07-31": "J.Carlos", "2026-08-07": "Óscar Ibarreta", "2026-08-14": "Lucas", "2026-08-21": "Óscar Ibarreta", "2026-08-28": "Lucas",
+            // Septiembre
             "2026-09-04": "J.Carlos", "2026-09-11": "Óscar Ibañez", "2026-09-18": "Lucas", "2026-09-25": "Óscar Ibarreta",
             // Octubre
             "2026-10-02": "Óscar Ibañez", "2026-10-09": "J.Carlos", "2026-10-16": "Óscar Ibarreta", "2026-10-23": "Lucas",
@@ -564,13 +563,11 @@
         }
 
         async function init() {
-            // Forzar plantilla oficial de la imagen por defecto
             guardiasSemanas = { ...cuadranteOficial2026 };
 
             if (dbSupabase) {
                 try {
                     updateNetworkStatus('sync', 'Sincronizando');
-                    // Sincronizar con Supabase subiendo o asegurando las fechas oficiales si faltaban
                     let { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
                     if (guardData && guardData.length > 0) {
                         guardData.forEach(r => {
@@ -682,7 +679,10 @@
             let counter = lastHolidayTechIndex;
 
             while (dIter.getFullYear() === currentYear) {
-                let fechaStr = dIter.toISOString().split('T')[0];
+                let m = String(dIter.getMonth() + 1).padStart(2, '0');
+                let d = String(dIter.getDate()).padStart(2, '0');
+                let fechaStr = `${dIter.getFullYear()}-${m}-${d}`;
+                
                 nuevoCuadranteAnual[fechaStr] = techNames[counter % techNames.length];
                 counter++;
                 dIter.setDate(dIter.getDate() + 7);
@@ -732,14 +732,25 @@
             renderStats();
         }
 
+        // --- FUNCIÓN CORREGIDA PARA EL FORMATO DE FECHA LOCAL ESTRICTO Y COINCIDENTE ---
         function renderActiveGuardBanners() {
             let today = new Date();
-            let dCheck = new Date(today);
-            while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
-            let fechaStr = dCheck.toISOString().split('T')[0];
+            let dCheck = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            
+            // Retroceder exactamente hasta el último viernes (getDay() === 5)
+            let dayOfWeek = dCheck.getDay(); // 0: Dom, 1: Lun, ..., 5: Vie, 6: Sáb
+            let diff = (dayOfWeek < 5 ? (7 - (5 - dayOfWeek)) : (dayOfWeek - 5));
+            dCheck.setDate(dCheck.getDate() - diff);
+            
+            // Formatear manualmente a YYYY-MM-DD local para evitar desfases de zona horaria de UTC
+            let y = dCheck.getFullYear();
+            let m = String(dCheck.getMonth() + 1).padStart(2, '0');
+            let d = String(dCheck.getDate()).padStart(2, '0');
+            let fechaStr = `${y}-${m}-${d}`;
             
             let tecnicoActual = guardiasSemanas[fechaStr] || "Sin asignar";
-            let fechaFinAct = new Date(dCheck); fechaFinAct.setDate(fechaFinAct.getDate() + 7);
+            let fechaFinAct = new Date(dCheck); 
+            fechaFinAct.setDate(fechaFinAct.getDate() + 7);
 
             let tObjAct = tecnicos.find(t => t.name === tecnicoActual);
             let colorAct = tObjAct ? tObjAct.color : '#3b82f6';
@@ -749,11 +760,18 @@
             document.getElementById('active-tech-icon').style.color = colorAct;
             document.getElementById('active-guard-dates').innerText = `Del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFinAct.getDate()}/${fechaFinAct.getMonth()+1}`;
 
+            // Calcular el próximo técnico (la semana siguiente al viernes actual)
             let dNext = new Date(dCheck);
             dNext.setDate(dNext.getDate() + 7);
-            let fechaNextStr = dNext.toISOString().split('T')[0];
+            
+            let yN = dNext.getFullYear();
+            let mN = String(dNext.getMonth() + 1).padStart(2, '0');
+            let dN = String(dNext.getDate()).padStart(2, '0');
+            let fechaNextStr = `${yN}-${mN}-${dN}`;
+            
             let tecnicoSiguiente = guardiasSemanas[fechaNextStr] || "Sin asignar";
-            let fechaFinNext = new Date(dNext); fechaFinNext.setDate(fechaFinNext.getDate() + 7);
+            let fechaFinNext = new Date(dNext); 
+            fechaFinNext.setDate(fechaFinNext.getDate() + 7);
 
             let tObjNext = tecnicos.find(t => t.name === tecnicoSiguiente);
             let colorNext = tObjNext ? tObjNext.color : '#facc15';
@@ -786,7 +804,10 @@
                 for (let k = 0; k < 7; k++) {
                     let dCheck = new Date(dtObj); dCheck.setDate(dCheck.getDate() - k);
                     if (dCheck.getDay() === 5) {
-                        let fStr = dCheck.toISOString().split('T')[0];
+                        let yC = dCheck.getFullYear();
+                        let mC = String(dCheck.getMonth() + 1).padStart(2, '0');
+                        let dC = String(dCheck.getDate()).padStart(2, '0');
+                        let fStr = `${yC}-${mC}-${dC}`;
                         if (guardiasSemanas[fStr]) techG = guardiasSemanas[fStr];
                         break;
                     }
@@ -820,7 +841,11 @@
             let finMes = new Date(currentYear, currentMonth + 1, 0);
 
             while (d <= finMes) {
-                let fechaStr = d.toISOString().split('T')[0];
+                let yW = d.getFullYear();
+                let mW = String(d.getMonth() + 1).padStart(2, '0');
+                let dW = String(d.getDate()).padStart(2, '0');
+                let fechaStr = `${yW}-${mW}-${dW}`;
+                
                 let tecnico = guardiasSemanas[fechaStr] || "Sin asignar";
                 let fechaFin = new Date(d); fechaFin.setDate(fechaFin.getDate() + 7);
 
@@ -968,9 +993,16 @@
 
         function enviarAlertaWhatsApp() {
             let today = new Date();
-            let dCheck = new Date(today);
-            while (dCheck.getDay() !== 5) { dCheck.setDate(dCheck.getDate() - 1); }
-            let fechaStr = dCheck.toISOString().split('T')[0];
+            let dCheck = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            let dayOfWeek = dCheck.getDay();
+            let diff = (dayOfWeek < 5 ? (7 - (5 - dayOfWeek)) : (dayOfWeek - 5));
+            dCheck.setDate(dCheck.getDate() - diff);
+            
+            let yA = dCheck.getFullYear();
+            let mA = String(dCheck.getMonth() + 1).padStart(2, '0');
+            let dA = String(dCheck.getDate()).padStart(2, '0');
+            let fechaStr = `${yA}-${mA}-${dA}`;
+            
             let tecnicoActual = guardiasSemanas[fechaStr] || "Técnico";
             
             let totalSemana = 0; 
