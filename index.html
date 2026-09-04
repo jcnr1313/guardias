@@ -40,7 +40,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-app); color: var(--text-main); padding: 20px; min-height: 100vh; position: relative; }
-        
         body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%); opacity: 0.15; pointer-events: none; z-index: -1; }
 
         .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
@@ -60,14 +59,12 @@
         
         .month-nav { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1rem; }
 
-        /* Widget de Estado de Red HUD */
         .network-status-badge { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; }
         .net-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; transition: background 0.3s; }
         .net-dot.online { background: #22c55e; color: #22c55e; animation: pulse 2s infinite; }
         .net-dot.sync { background: #f59e0b; color: #f59e0b; }
         .net-dot.offline { background: #ef4444; color: #ef4444; }
 
-        /* Contenedores de Guardias (Actual y Próximo) */
         .guards-banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 768px) { .guards-banner-grid { grid-template-columns: 1fr; } }
 
@@ -88,7 +85,6 @@
         .calendar-legend { display: flex; gap: 12px; font-size: 0.75rem; font-weight: 600; align-items: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         
-        /* Calendario adaptativo y completamente visible */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: var(--border); border-radius: var(--radius-md); border: 1px solid var(--border); width: 100%; }
         .cal-header { text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); padding: 10px 2px; background: var(--bg-app); text-transform: uppercase; letter-spacing: 0.05em; }
         .cal-cell { background: var(--bg-app); min-height: 85px; padding: 6px; position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; overflow: hidden; }
@@ -114,7 +110,6 @@
         .sidebar-card h3 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         .sidebar-card h3 .title-left { display: flex; align-items: center; gap: 8px; }
         
-        /* Tooltip / Popup de Información Interactivo por Clic y Hover */
         .info-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
         .info-tooltip-container:hover { color: var(--accent); }
         .info-tooltip { position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid var(--accent); color: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: normal; width: 210px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; }
@@ -142,11 +137,9 @@
         .technicians-list { display: flex; flex-direction: column; gap: 6px; }
         .tech-badge-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.82rem; }
 
-        /* Terminal de Log de Actividad */
         .audit-log { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #34d399; max-height: 80px; overflow-y: auto; }
         .audit-log-item { margin-bottom: 3px; opacity: 0.85; }
 
-        /* Modales */
         .modal-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--bg-card); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 25px; width: 100%; max-width: 420px; box-shadow: 0 0 40px var(--accent-glow); text-align: center; }
@@ -171,7 +164,7 @@
         <header>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <a href="index.html" class="btn btn-secondary" title="Volver al Portal"><i class="fa-solid fa-arrow-left"></i></a>
-                <!-- Logo con Tamaño Equilibrado -->
+                <!-- Logo -->
                 <div style="width: 72px; height: 38px; min-width: 72px; min-height: 38px;" class="px-2 py-1 rounded-xl bg-slate-900 border border-accent/40 flex items-center justify-center shadow-md shadow-accent/20 animate-pulse-slow overflow-hidden shrink-0">
                     <img src="logo.jpeg" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; display: block;">
                 </div>
@@ -181,7 +174,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <!-- Indicador de Red en Tiempo Real -->
+                <!-- Indicador de Red -->
                 <div class="network-status-badge" id="net-status-badge" title="Estado de la Sincronización en Directo">
                     <span class="net-dot online" id="net-dot"></span>
                     <span id="net-text" class="font-mono-custom">En Línea</span>
@@ -192,17 +185,17 @@
                     <option value="cyberpunk">Cyberpunk</option>
                     <option value="matrix">Matrix (Verde)</option>
                 </select>
-                <!-- Botones de Exportación Avanzada -->
+                <!-- Botones de Exportación -->
                 <button class="btn btn-secondary" onclick="exportarExcel()" title="Exportar Cuadrante a Excel (.csv)"><i class="fa-solid fa-file-excel text-emerald-400"></i> Excel</button>
                 <button class="btn btn-secondary" onclick="sincronizarICal()" title="Sincronizar con Calendario iCal"><i class="fa-solid fa-calendar-arrow-down text-cyan-400"></i> iCal</button>
                 <button class="btn btn-secondary" onclick="window.print()" title="Imprimir / Exportar PDF"><i class="fa-solid fa-print"></i></button>
                 
-                <!-- Botón Nuevo con Tooltip Informativo Integrado -->
+                <!-- Botón Generar Cuadrante Anual Nuevo con Seguridad y Tooltip -->
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo</button>
+                    <button class="btn btn-danger" onclick="abrirModalConfirmacion()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generar cuadrante anual nuevo</button>
                     <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                         <i class="fa-solid fa-circle-info"></i>
-                        <div class="info-tooltip">Genera un nuevo cuadrante anual redistribuyendo de forma equitativa y automática las semanas entre los técnicos activos.</div>
+                        <div class="info-tooltip">Genera el cuadrante del año en curso rotando equitativamente las semanas y alternando los festivos respecto al año anterior.</div>
                     </div>
                 </div>
 
@@ -216,7 +209,6 @@
 
         <!-- Bloque de Guardias (Actual y Próximo) -->
         <div class="guards-banner-grid">
-            <!-- Guardia Activa -->
             <div class="guard-status-card active" id="active-guard-container">
                 <div class="active-info">
                     <div class="active-avatar" id="active-tech-icon" style="color: var(--accent);"><i class="fa-solid fa-shield-halved"></i></div>
@@ -231,7 +223,6 @@
                 </div>
             </div>
 
-            <!-- Próxima Guardia -->
             <div class="guard-status-card next" id="next-guard-container">
                 <div class="active-info">
                     <div class="active-avatar" id="next-tech-icon" style="color: #facc15;"><i class="fa-solid fa-user-clock"></i></div>
@@ -255,12 +246,10 @@
                         <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
                             <i class="fa-solid fa-calendar-days" style="color: var(--accent);"></i> Calendario Táctico
                         </h2>
-                        <!-- Info Tooltip Calendario -->
                         <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                             <i class="fa-solid fa-circle-info"></i>
-                            <div class="info-tooltip">Muestra visualmente qué técnico está asignado cada día del mes en curso, con indicadores de días festivos y tarifas aplicadas.</div>
+                            <div class="info-tooltip">Muestra el técnico asignado por día. Puedes navegar entre años anteriores y futuros para comparar histórico.</div>
                         </div>
-                        <!-- Filtro Rápido por Técnico -->
                         <select id="filter-tech-select" onchange="render()" class="config-input" style="padding: 4px 8px; width: auto; font-size: 0.75rem;">
                             <option value="all">Filtro: Todos</option>
                         </select>
@@ -276,16 +265,15 @@
                 </div>
             </div>
 
-            <!-- Panel Lateral de Control -->
+            <!-- Panel Lateral -->
             <aside class="sidebar">
-                <!-- Intercambio de Guardias (Trading) -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-right-left text-cyan-400"></i> Intercambio (Trading)
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Permite solicitar o ejecutar un intercambio rápido de semanas de guardia entre dos técnicos de forma automatizada.</div>
+                                <div class="info-tooltip">Permite solicitar o ejecutar un intercambio rápido de semanas de guardia entre técnicos.</div>
                             </div>
                         </span>
                     </h3>
@@ -306,14 +294,13 @@
                     </div>
                 </div>
 
-                <!-- Notificaciones Automáticas (Mensaje Recordatorio con Importe Automático) -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-paper-plane text-emerald-400"></i> Alertas y Avisos
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Envía un recordatorio de guardia al técnico con el importe calculado según los festivos de la semana.</div>
+                                <div class="info-tooltip">Envía un recordatorio de guardia con el importe calculado según festivos.</div>
                             </div>
                         </span>
                     </h3>
@@ -326,28 +313,26 @@
                     </div>
                 </div>
 
-                <!-- Estadísticas y Reparto Equitativo -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-chart-pie text-amber-400"></i> Reparto Equitativo
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Porcentaje y total de semanas asignadas a cada técnico para asegurar un balance equitativo anual.</div>
+                                <div class="info-tooltip">Porcentaje y total de semanas asignadas a cada técnico en el año visualizado.</div>
                             </div>
                         </span>
                     </h3>
                     <div class="stats-grid" id="stats-grid-container"></div>
                 </div>
 
-                <!-- Configuración de Tarifas -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-coins text-yellow-400"></i> Tarifas Operativas
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Coste por día laboral y festivo aplicado automáticamente en el cálculo de cada semana de guardia.</div>
+                                <div class="info-tooltip">Coste por día laboral y festivo aplicado en los cálculos económicos.</div>
                             </div>
                         </span>
                     </h3>
@@ -363,14 +348,13 @@
                     </div>
                 </div>
 
-                <!-- Gestión de Técnicos -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-users text-indigo-400"></i> Personal
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Directorio de técnicos activos registrados en el sistema de guardias.</div>
+                                <div class="info-tooltip">Directorio de técnicos activos registrados.</div>
                             </div>
                         </span>
                         <button class="btn btn-primary" style="padding: 3px 7px; font-size: 0.72rem;" onclick="abrirModalTech()"><i class="fa-solid fa-plus"></i> Añadir</button>
@@ -378,14 +362,13 @@
                     <div class="technicians-list" id="technicians-list-container"></div>
                 </div>
 
-                <!-- Resumen Semanal -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-list-check text-emerald-400"></i> Guardias Semanales
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Listado cronológico de las semanas de guardia (Viernes a Viernes) y su coste económico total estimado.</div>
+                                <div class="info-tooltip">Listado cronológico de las semanas de guardia (Viernes a Viernes) del mes activo.</div>
                             </div>
                         </span>
                         <span class="text-xs text-slate-400 font-mono-custom">(Vie-Vie)</span>
@@ -393,14 +376,13 @@
                     <div class="weekly-summary-list" id="weekly-summary"></div>
                 </div>
 
-                <!-- Log de Auditoría en Tiempo Real -->
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
                             <i class="fa-solid fa-terminal text-cyan-400"></i> Actividad en Red
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Terminal de eventos y sincronización en tiempo real con la base de datos centralizada de Supabase.</div>
+                                <div class="info-tooltip">Terminal de eventos y sincronización en tiempo real.</div>
                             </div>
                         </span>
                         <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
@@ -419,11 +401,11 @@
             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto mb-4 text-xl">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 class="text-base font-bold text-white mb-2">¿Generar Nuevo Cuadrante?</h3>
-            <p class="text-xs text-slate-400 mb-5 leading-relaxed">El algoritmo recalculará las rotaciones anuales de forma equitativa. ¿Proceder?</p>
+            <h3 class="text-base font-bold text-white mb-2">¿Generar cuadrante anual nuevo?</h3>
+            <p class="text-xs text-slate-400 mb-5 leading-relaxed">El sistema recalculará el año completo rotando equitativamente las semanas y alternando los festivos respecto al año anterior. ¿Proceder?</p>
             <div class="flex gap-3 justify-center">
                 <button class="btn btn-secondary" onclick="cerrarModalConfirmacion()">Cancelar</button>
-                <button class="btn btn-primary" onclick="ejecutarGeneracionAnual()">Confirmar</button>
+                <button class="btn btn-danger" onclick="ejecutarGeneracionAnual()">Confirmar</button>
             </div>
         </div>
     </div>
@@ -632,30 +614,66 @@
         }
         function cerrarModalTech() { document.getElementById('modal-tech').classList.remove('show'); }
 
+        // Algoritmo de Generación Anual con Rueda Inteligente de Festivos
         async function ejecutarGeneracionAnual() {
             cerrarModalConfirmacion();
             playBeep('success');
-            let keys = Object.keys(cuadranteOficial2026).sort();
+
             let techNames = tecnicos.map(t => t.name);
-            let idx = Math.floor(Math.random() * techNames.length);
-            
-            guardiasSemanas = {};
-            keys.forEach(k => {
-                guardiasSemanas[k] = techNames[idx % techNames.length];
-                idx++;
+            let prevYear = currentYear - 1;
+
+            // Analizar quién hizo el último festivo importante de Navidad/Año Nuevo del año anterior para desplazar la rueda
+            let lastHolidayTechIndex = 0;
+            let claveNavidadAnterior = `${prevYear}-12-25`;
+            if (guardiasSemanas[claveNavidadAnterior]) {
+                let idxEncontrado = techNames.indexOf(guardiasSemanas[claveNavidadAnterior]);
+                if (idxEncontrado !== -1) {
+                    // Desplazamos para que el siguiente empiece el nuevo año
+                    lastHolidayTechIndex = (idxEncontrado + 1) % techNames.length;
+                } else {
+                    lastHolidayTechIndex = Math.floor(Math.random() * techNames.length);
+                }
+            } else {
+                lastHolidayTechIndex = Math.floor(Math.random() * techNames.length);
+            }
+
+            // Generar todos los viernes del año en curso
+            let dIter = new Date(currentYear, 0, 1);
+            while (dIter.getDay() !== 5) {
+                dIter.setDate(dIter.getDate() + 1);
+            }
+
+            let nuevoCuadranteAnual = {};
+            let counter = lastHolidayTechIndex;
+
+            while (dIter.getFullYear() === currentYear) {
+                let fechaStr = dIter.toISOString().split('T')[0];
+                nuevoCuadranteAnual[fechaStr] = techNames[counter % techNames.length];
+                counter++;
+                dIter.setDate(dIter.getDate() + 7);
+            }
+
+            // Fusionar con las guardias ya existentes o reemplazar las de este año
+            Object.keys(guardiasSemanas).forEach(k => {
+                if (!k.startsWith(currentYear.toString())) {
+                    nuevoCuadranteAnual[k] = guardiasSemanas[k];
+                }
             });
+            guardiasSemanas = nuevoCuadranteAnual;
 
             if (dbSupabase) {
                 try {
-                    let rows = Object.keys(guardiasSemanas).map(k => ({ fecha_inicio: k, tecnico: guardiasSemanas[k] }));
+                    let rows = Object.keys(nuevoCuadranteAnual)
+                        .filter(k => k.startsWith(currentYear.toString()))
+                        .map(k => ({ fecha_inicio: k, tecnico: nuevoCuadranteAnual[k] }));
                     await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
                 } catch(e) {
-                    showToast("⚠️ Error al sincronizar nuevo cuadrante");
+                    showToast("⚠️ Error al sincronizar nuevo cuadrante con Supabase");
                 }
             }
             render();
-            showToast("✨ Nuevo cuadrante generado con rotación equitativa");
-            logAudit("Generado nuevo cuadrante anual automático.");
+            showToast(`✨ Cuadrante ${currentYear} generado con rueda inteligente de festivos`);
+            logAudit(`Generado nuevo cuadrante anual ${currentYear} con rotación de festivos.`);
         }
 
         async function actualizarTarifas() {
@@ -821,9 +839,13 @@
             let conteo = {};
             tecnicos.forEach(t => conteo[t.name] = 0);
             let totalGuards = 0;
+            
+            // Contabilizar solo el año activo actual para las estadísticas
             for (let k in guardiasSemanas) {
-                let tech = guardiasSemanas[k];
-                if (conteo[tech] !== undefined) { conteo[tech]++; totalGuards++; }
+                if (k.startsWith(currentYear.toString())) {
+                    let tech = guardiasSemanas[k];
+                    if (conteo[tech] !== undefined) { conteo[tech]++; totalGuards++; }
+                }
             }
             tecnicos.forEach(t => {
                 let count = conteo[t.name] || 0;
@@ -939,7 +961,9 @@
         function exportarExcel() {
             let csvContent = "data:text/csv;charset=utf-8,Fecha_Inicio,Tecnico\n";
             for (let k in guardiasSemanas) {
-                csvContent += `${k},${guardiasSemanas[k]}\n`;
+                if (k.startsWith(currentYear.toString())) {
+                    csvContent += `${k},${guardiasSemanas[k]}\n`;
+                }
             }
             let encodedUri = encodeURI(csvContent);
             let link = document.createElement("a");
@@ -949,33 +973,35 @@
             link.click();
             document.body.removeChild(link);
             showToast("📊 Cuadrante exportado a Excel/CSV");
-            logAudit("Exportación a formato CSV/Excel realizada.");
+            logAudit(`Exportación CSV realizada para el año ${currentYear}.`);
         }
 
         function sincronizarICal() {
             let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//HUD Command Center//Guardias//ES\n";
             for (let k in guardiasSemanas) {
-                let dtStart = k.replace(/-/g, '');
-                let dEnd = new Date(k); dEnd.setDate(dEnd.getDate() + 7);
-                let dtEnd = dEnd.toISOString().split('T')[0].replace(/-/g, '');
-                icsContent += "BEGIN:VEVENT\n";
-                icsContent += `SUMMARY:Guardia Técnico - ${guardiasSemanas[k]}\n`;
-                icsContent += `DTSTART;VALUE=DATE:${dtStart}\n`;
-                icsContent += `DTEND;VALUE=DATE:${dtEnd}\n`;
-                icsContent += `DESCRIPTION:Semana de guardia asignada a ${guardiasSemanas[k]}\n`;
-                icsContent += "END:VEVENT\n";
+                if (k.startsWith(currentYear.toString())) {
+                    let dtStart = k.replace(/-/g, '');
+                    let dEnd = new Date(k); dEnd.setDate(dEnd.getDate() + 7);
+                    let dtEnd = dEnd.toISOString().split('T')[0].replace(/-/g, '');
+                    icsContent += "BEGIN:VEVENT\n";
+                    icsContent += `SUMMARY:Guardia Técnico - ${guardiasSemanas[k]}\n`;
+                    icsContent += `DTSTART;VALUE=DATE:${dtStart}\n`;
+                    icsContent += `DTEND;VALUE=DATE:${dtEnd}\n`;
+                    icsContent += `DESCRIPTION:Semana de guardia asignada a ${guardiasSemanas[k]}\n`;
+                    icsContent += "END:VEVENT\n";
+                }
             }
             icsContent += "END:VCALENDAR";
 
             let blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'guardias_command_center.ics');
+            link.setAttribute('download', `guardias_${currentYear}.ics`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             showToast("📅 Archivo iCal generado para Calendario");
-            logAudit("Sincronización iCal generada.");
+            logAudit(`Sincronización iCal generada para ${currentYear}.`);
         }
 
         function changeMonth(dir) {
