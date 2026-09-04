@@ -801,9 +801,8 @@
             const container = document.getElementById('weekly-summary');
             container.innerHTML = '';
             
-            // Creamos un nuevo objeto de fecha para el inicio del mes activo sin mutar referencias globales
             let d = new Date(currentYear, currentMonth, 1);
-            while (d.getDay() !== 5) { d.setDate(d.getDate() - 1); }
+            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
             let finMes = new Date(currentYear, currentMonth + 1, 0);
 
             while (d <= finMes) {
@@ -834,7 +833,6 @@
                     </div>
                 `;
                 
-                // Aseguramos avanzar a la siguiente semana correctamente creando un nuevo objeto para evitar bucles infinitos o referencias cruzadas
                 d = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000);
             }
         }
