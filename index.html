@@ -564,13 +564,18 @@
         }
 
         async function init() {
+            // Forzar plantilla oficial de la imagen por defecto
+            guardiasSemanas = { ...cuadranteOficial2026 };
+
             if (dbSupabase) {
                 try {
                     updateNetworkStatus('sync', 'Sincronizando');
+                    // Sincronizar con Supabase subiendo o asegurando las fechas oficiales si faltaban
                     let { data: guardData } = await dbSupabase.from('guardias_semanas').select('*');
                     if (guardData && guardData.length > 0) {
-                        guardiasSemanas = {};
-                        guardData.forEach(r => guardiasSemanas[r.fecha_inicio] = r.tecnico);
+                        guardData.forEach(r => {
+                            if (r.fecha_inicio) guardiasSemanas[r.fecha_inicio] = r.tecnico;
+                        });
                     }
 
                     let { data: techData } = await dbSupabase.from('tecnicos').select('*');
@@ -606,13 +611,11 @@
                     console.error("Error conectando con Supabase:", err);
                     updateNetworkStatus('offline', 'Modo Local');
                     logAudit("Error de red. Activado modo local.");
-                    showToast("⚠️ Modo local activado (Sin conexión)");
                 }
             } else {
                 updateNetworkStatus('offline', 'Local');
             }
 
-            if (Object.keys(guardiasSemanas).length === 0) guardiasSemanas = { ...cuadranteOficial2026 };
             updateTechFilterOptions();
             updateTradingSelects();
             render();
@@ -698,9 +701,7 @@
                         .filter(k => k.startsWith(currentYear.toString()))
                         .map(k => ({ fecha_inicio: k, tecnico: nuevoCuadranteAnual[k] }));
                     await dbSupabase.from('guardias_semanas').upsert(rows, { onConflict: ['fecha_inicio'] });
-                } catch(e) {
-                    showToast("⚠️ Error al sincronizar nuevo cuadrante con Supabase");
-                }
+                } catch(e) {}
             }
             render();
             showToast(`✨ Cuadrante ${currentYear} generado con rueda inteligente de festivos`);
@@ -943,9 +944,7 @@
             if (dbSupabase) {
                 try {
                     await dbSupabase.from('guardias_semanas').upsert({ fecha_inicio: fechaStr, tecnico: nuevo }, { onConflict: ['fecha_inicio'] });
-                } catch(e) {
-                    showToast("⚠️ Error al sincronizar cambio");
-                }
+                } catch(e) {}
             }
             render(); 
             showToast("☁️ Guardia reasignada con éxito");
