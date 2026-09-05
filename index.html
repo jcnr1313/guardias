@@ -484,6 +484,8 @@
         const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         let tarifas = { lab: 28, fes: 70 };
+        
+        /* Teléfonos actualizados según las capturas facilitadas */
         let tecnicos = [
             { id: 1, name: "J.Carlos", color: "#facc15", phone: "+34600000000" },
             { id: 2, name: "Óscar Ibarreta", color: "#ef4444", phone: "+34670972544" },
@@ -666,7 +668,7 @@
             });
             alertSelect.innerHTML += `<option value="${contactoSecretaria.phone}">${contactoSecretaria.name}</option>`;
             
-            // Seleccionar el primero por defecto y cargar su teléfono
+            // Seleccionar el primero por defecto y cargar su teléfono correspondiente
             if (alertSelect.options.length > 0) {
                 document.getElementById('alert-phone').value = alertSelect.value;
             }
