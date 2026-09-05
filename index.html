@@ -323,16 +323,23 @@
                             <i class="fa-solid fa-paper-plane text-emerald-400"></i> Alertas y Avisos
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Envía un recordatorio de guardia con el importe calculado según festivos.</div>
+                                <div class="info-tooltip">Envía recordatorios a técnicos o informe consolidado a la secretaria con los importes desglosados.</div>
                             </div>
                         </span>
                     </h3>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="config-field">
+                            <label>Destinatario (Técnico / Carmen)</label>
+                            <select id="alert-recipient-select" class="config-input" onchange="actualizarTelefonoAlerta(this)">
+                                <!-- Se llena dinámicamente -->
+                            </select>
+                        </div>
                         <div class="config-field">
                             <label>Teléfono de Contacto</label>
-                            <input type="text" id="alert-phone" value="+34 600 000 000" class="config-input">
+                            <input type="text" id="alert-phone" class="config-input font-mono-custom">
                         </div>
                         <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.78rem;" onclick="enviarAlertaWhatsApp()"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Enviar Recordatorio de Guardia</button>
+                        <button class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 0.78rem; background: #059669;" onclick="enviarInformeSecretaria()"><i class="fa-solid fa-file-invoice-dollar text-white"></i> Enviar Informe Mensual a Carmen</button>
                     </div>
                 </div>
 
@@ -478,42 +485,31 @@
 
         let tarifas = { lab: 28, fes: 70 };
         let tecnicos = [
-            { id: 1, name: "J.Carlos", color: "#facc15" },
-            { id: 2, name: "Óscar Ibarreta", color: "#ef4444" },
-            { id: 3, name: "Lucas", color: "#d946ef" },
-            { id: 4, name: "Óscar Idañez", color: "#3b82f6" },
-            { id: 5, name: "Jacobo", color: "#06b6d4" }
+            { id: 1, name: "J.Carlos", color: "#facc15", phone: "+34600000000" },
+            { id: 2, name: "Óscar Ibarreta", color: "#ef4444", phone: "+34670972544" },
+            { id: 3, name: "Lucas", color: "#d946ef", phone: "+34666313577" },
+            { id: 4, name: "Óscar Idañez", color: "#3b82f6", phone: "+34674438545" },
+            { id: 5, name: "Jacobo", color: "#06b6d4", phone: "+34617243672" }
         ];
+        
+        let contactoSecretaria = { name: "Carmen (Secretaria)", phone: "+34627956691" };
         let guardiasSemanas = {};
 
-        // Variables temporales para el control de PIN pendiente
         let pendingActionCallback = null;
         let originalRateValues = { lab: 28, fes: 70 };
 
         const cuadranteOficial2026 = {
-            // Enero
             "2026-01-02": "J.Carlos", "2026-01-09": "Óscar Ibarreta", "2026-01-16": "Lucas", "2026-01-23": "Óscar Idañez",
-            // Febrero
             "2026-01-30": "J.Carlos", "2026-02-06": "Óscar Ibarreta", "2026-02-13": "Lucas", "2026-02-20": "Óscar Idañez",
-            // Marzo
             "2026-02-27": "J.Carlos", "2026-03-06": "Óscar Ibarreta", "2026-03-13": "Lucas", "2026-03-20": "Óscar Idañez",
-            // Abril
             "2026-03-27": "J.Carlos", "2026-04-03": "Óscar Ibarreta", "2026-04-10": "Lucas", "2026-04-17": "Óscar Idañez", "2026-04-24": "J.Carlos",
-            // Mayo
             "2026-05-01": "Óscar Ibarreta", "2026-05-08": "Lucas", "2026-05-15": "Óscar Idañez", "2026-05-22": "J.Carlos",
-            // Junio
             "2026-05-29": "Óscar Ibarreta", "2026-06-05": "Lucas", "2026-06-12": "Óscar Idañez", "2026-06-19": "J.Carlos",
-            // Julio
             "2026-06-26": "Óscar Ibarreta", "2026-07-03": "Lucas", "2026-07-10": "Óscar Ibarreta", "2026-07-17": "J.Carlos", "2026-07-24": "Óscar Idañez",
-            // Agosto
             "2026-07-31": "J.Carlos", "2026-08-07": "Óscar Ibarreta", "2026-08-14": "Lucas", "2026-08-21": "Óscar Ibarreta", "2026-08-28": "Lucas",
-            // Septiembre
             "2026-09-04": "J.Carlos", "2026-09-11": "Óscar Idañez", "2026-09-18": "Lucas", "2026-09-25": "Óscar Ibarreta",
-            // Octubre
             "2026-10-02": "Óscar Idañez", "2026-10-09": "J.Carlos", "2026-10-16": "Óscar Ibarreta", "2026-10-23": "Lucas",
-            // Noviembre
             "2026-10-30": "Óscar Idañez", "2026-11-06": "J.Carlos", "2026-11-13": "Óscar Ibarreta", "2026-11-20": "Lucas",
-            // Diciembre
             "2026-11-27": "Óscar Idañez", "2026-12-04": "J.Carlos", "2026-12-11": "Óscar Ibarreta", "2026-12-18": "Lucas", "2026-12-25": "Óscar Idañez"
         };
 
@@ -637,6 +633,7 @@
 
             updateTechFilterOptions();
             updateTradingSelects();
+            updateAlertRecipientOptions();
             render();
         }
 
@@ -661,6 +658,24 @@
             });
         }
 
+        function updateAlertRecipientOptions() {
+            const alertSelect = document.getElementById('alert-recipient-select');
+            alertSelect.innerHTML = '';
+            tecnicos.forEach(t => {
+                alertSelect.innerHTML += `<option value="${t.phone || ''}">${t.name}</option>`;
+            });
+            alertSelect.innerHTML += `<option value="${contactoSecretaria.phone}">${contactoSecretaria.name}</option>`;
+            
+            // Seleccionar el primero por defecto y cargar su teléfono
+            if (alertSelect.options.length > 0) {
+                document.getElementById('alert-phone').value = alertSelect.value;
+            }
+        }
+
+        function actualizarTelefonoAlerta(selectEl) {
+            document.getElementById('alert-phone').value = selectEl.value;
+        }
+
         function abrirModalConfirmacion() { playBeep('click'); document.getElementById('modal-overlay').classList.add('show'); }
         function cerrarModalConfirmacion() { document.getElementById('modal-overlay').classList.remove('show'); }
 
@@ -672,7 +687,6 @@
         }
         function cerrarModalTech() { document.getElementById('modal-tech').classList.remove('show'); }
 
-        // --- FUNCIONES DE SEGURIDAD PIN (1313) ---
         function solicitarPin(descripcion, callback) {
             document.getElementById('pin-prompt-desc').innerText = descripcion;
             document.getElementById('input-security-pin').value = '';
@@ -684,7 +698,6 @@
         function cerrarModalPin() {
             document.getElementById('modal-pin').classList.remove('show');
             pendingActionCallback = null;
-            // Si se cancela cambio de tarifas, restaurar valores visuales originales
             document.getElementById('rate-lab').value = tarifas.lab;
             document.getElementById('rate-fes').value = tarifas.fes;
             render();
@@ -709,7 +722,6 @@
             }
         }
 
-        // Interceptor para cambio de tarifas protegido por PIN
         function solicitarPinParaTarifas(inputEl) {
             let nuevoLab = parseFloat(document.getElementById('rate-lab').value) || 0;
             let nuevoFes = parseFloat(document.getElementById('rate-fes').value) || 0;
@@ -988,7 +1000,7 @@
             
             let colores = ["#38bdf8", "#34d399", "#a78bfa", "#fbbf24", "#f43f5e", "#06b6d4"];
             let color = colores[tecnicos.length % colores.length];
-            let nuevoTech = { id: tecnicos.length + 1, name: nombre, color: color };
+            let nuevoTech = { id: tecnicos.length + 1, name: nombre, color: color, phone: "+34600000000" };
             tecnicos.push(nuevoTech);
 
             if (dbSupabase) {
@@ -998,6 +1010,7 @@
             cerrarModalTech();
             updateTechFilterOptions();
             updateTradingSelects();
+            updateAlertRecipientOptions();
             playBeep('success');
             render();
             showToast(`✅ Técnico ${nombre} incorporado`);
@@ -1017,6 +1030,7 @@
 
                 updateTechFilterOptions();
                 updateTradingSelects();
+                updateAlertRecipientOptions();
                 playBeep('click');
                 render();
                 showToast(`ℹ️ Técnico dado de baja`);
@@ -1024,7 +1038,6 @@
             }
         }
 
-        // --- INTERCEPTOR DE PIN PARA CAMBIO DE TÉCNICO EN LISTA SEMANAL ---
         function solicitarPinParaCambioTecnico(fechaStr, selectEl) {
             let nuevoTecnico = selectEl.value;
             solicitarPin(`Autorizar reasignación de guardia para el ${fechaStr} a ${nuevoTecnico}:`, async () => {
@@ -1063,6 +1076,10 @@
         }
 
         function enviarAlertaWhatsApp() {
+            let telefono = document.getElementById('alert-phone').value.trim();
+            let alertSelect = document.getElementById('alert-recipient-select');
+            let nombreDestinatario = alertSelect.options[alertSelect.selectedIndex].text;
+
             let today = new Date();
             let dCheck = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             let dayOfWeek = dCheck.getDay();
@@ -1086,10 +1103,71 @@
             let fechaFin = new Date(dCheck); 
             fechaFin.setDate(fechaFin.getDate() + 7);
 
-            let mensaje = `Hola ${tecnicoActual}, te recordamos que tienes guardia esta semana (del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1}). El importe total estimado para esta semana es de ${totalSemana} €.`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
+            let mensaje = `Hola ${nombreDestinatario}, te recordamos que tienes guardia esta semana (${tecnicoActual}) del ${dCheck.getDate()}/${dCheck.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1}. El importe estimado para esta semana es de ${totalSemana} €.`;
+            let url = `https://wa.me/${telefono ? telefono.replace(/[^0-9]/g, '') : ''}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
             showToast("📤 Redirigiendo a WhatsApp con el recordatorio");
-            logAudit(`Recordatorio de guardia enviado a ${tecnicoActual}`);
+            logAudit(`Recordatorio enviado a ${nombreDestinatario}`);
+        }
+
+        function enviarInformeSecretaria() {
+            let telefonoCarmen = contactoSecretaria.phone.replace(/[^0-9]/g, '');
+            let mesNombre = monthsNames[currentMonth];
+            
+            let mensaje = `📋 *INFORME DE GUARDIAS - ${mesNombre.toUpperCase()} ${currentYear}*\n`;
+            mensaje += `Estimada Carmen, aquí tienes el desglose de guardias e importes para proceder al pago:\n\n`;
+
+            let d = new Date(currentYear, currentMonth, 1);
+            while (d.getDay() !== 5) { d.setDate(d.getDate() + 1); }
+            let finMes = new Date(currentYear, currentMonth + 1, 0);
+
+            let totalMesGeneral = 0;
+            let contadorSemanas = 1;
+
+            while (d <= finMes) {
+                let yW = d.getFullYear();
+                let mW = String(d.getMonth() + 1).padStart(2, '0');
+                let dW = String(d.getDate()).padStart(2, '0');
+                let fechaStr = `${yW}-${mW}-${dW}`;
+                
+                let tecnico = guardiasSemanas[fechaStr] || "Sin asignar";
+                let fechaFin = new Date(d); fechaFin.setDate(fechaFin.getDate() + 7);
+
+                let totalSemana = 0; 
+                let numLab = 0; 
+                let numFes = 0;
+                let dCalc = new Date(d);
+
+                for(let i = 0; i < 7; i++) {
+                    let esFestivo = getFestivos(dCalc.getMonth(), dCalc.getDate()).length > 0;
+                    if (esFestivo) {
+                        totalSemana += tarifas.fes;
+                        numFes++;
+                    } else {
+                        totalSemana += tarifas.lab;
+                        numLab++;
+                    }
+                    dCalc.setDate(dCalc.getDate() + 1);
+                }
+
+                totalMesGeneral += totalSemana;
+
+                mensaje += `*Semana ${contadorSemanas}* (${d.getDate()}/${d.getMonth()+1} al ${fechaFin.getDate()}/${fechaFin.getMonth()+1})\n`;
+                mensaje += `👤 Técnico: *${tecnico}*\n`;
+                mensaje += `🔹 Días lab. (${numLab}x${tarifas.lab}€) + Festivos (${numFes}x${tarifas.fes}€)\n`;
+                mensaje += `💰 Total: *${totalSemana} €*\n\n`;
+
+                contadorSemanas++;
+                d = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000);
+            }
+
+            mensaje += `──────────────────\n`;
+            mensaje += `💵 *TOTAL A PAGAR EN ${mesNombre.toUpperCase()}: ${totalMesGeneral} €*`;
+
+            let url = `https://wa.me/${telefonoCarmen}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+            showToast("📊 Informe mensual estructurado para Carmen generado");
+            logAudit(`Informe mensual de ${mesNombre} enviado a Carmen.`);
         }
 
         function exportarExcel() {
