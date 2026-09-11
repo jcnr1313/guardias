@@ -923,7 +923,7 @@
                 let tecnico = guardiasSemanas[fechaStr] || "Sin asignar";
                 let fechaFin = new Date(d); fechaFin.setDate(fechaFin.getDate() + 7);
 
-                // --- NUEVA LÓGICA: Contabilizar solo los días que pertenecen estrictamente a este mes ---
+                // --- CÁLCULO PROPORCIONAL ESTRICTO AL MES ACTUAL ---
                 let totalSemana = 0; 
                 let dCalc = new Date(d);
                 for(let i = 0; i < 7; i++) {
@@ -932,7 +932,7 @@
                     }
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
-                // ---------------------------------------------------------------------------------------
+                // ---------------------------------------------------
 
                 let tObj = tecnicos.find(t => t.name === tecnico);
                 let color = tObj ? tObj.color : '#64748b';
@@ -1140,7 +1140,7 @@
                 let tecnico = guardiasSemanas[fechaStr] || "Sin asignar";
                 let fechaFin = new Date(d); fechaFin.setDate(fechaFin.getDate() + 7);
 
-                // --- NUEVA LÓGICA PROPORCIONAL PARA EL INFORME DE CARMEN ---
+                // --- CÁLCULO PROPORCIONAL PARA EL INFORME DE CARMEN ---
                 let totalSemana = 0; 
                 let numLab = 0; 
                 let numFes = 0;
@@ -1159,7 +1159,7 @@
                     }
                     dCalc.setDate(dCalc.getDate() + 1);
                 }
-                // -----------------------------------------------------------
+                // -----------------------------------------------------
 
                 totalMesGeneral += totalSemana;
 
