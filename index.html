@@ -317,6 +317,32 @@
                     </div>
                 </div>
 
+                <!-- Traspaso Masivo de Guardias -->
+                <div class="card sidebar-card">
+                    <h3>
+                        <span class="title-left">
+                            <i class="fa-solid fa-users-slash text-rose-400"></i> Traspaso Masivo
+                            <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <div class="info-tooltip">Reasigna TODAS las guardias pasadas y futuras de un técnico a otro de forma masiva.</div>
+                            </div>
+                        </span>
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+                        <div class="config-field">
+                            <label>Técnico Saliente (Origen)</label>
+                            <select id="transfer-from-tech" class="config-input"></select>
+                        </div>
+                        <div class="config-field">
+                            <label>Técnico Entrante (Sustituto / Destino)</label>
+                            <select id="transfer-to-tech" class="config-input"></select>
+                        </div>
+                        <button class="btn btn-danger" style="width: 100%; justify-content: center; margin-top: 4px;" onclick="ejecutarTraspasoMasivoGuardias()">
+                            <i class="fa-solid fa-arrows-rotate"></i> Traspasar Todas las Guardias
+                        </button>
+                    </div>
+                </div>
+
                 <div class="card sidebar-card">
                     <h3>
                         <span class="title-left">
@@ -485,7 +511,6 @@
 
         let tarifas = { lab: 28, fes: 70 };
         
-        /* Teléfonos actualizados según las capturas facilitadas */
         let tecnicos = [
             { id: 1, name: "J.Carlos", color: "#facc15", phone: "+34600000000" },
             { id: 2, name: "Óscar Ibarreta", color: "#ef4444", phone: "+34670972544" },
@@ -652,11 +677,19 @@
         function updateTradingSelects() {
             const fromSelect = document.getElementById('trade-from-tech');
             const toSelect = document.getElementById('trade-to-tech');
-            fromSelect.innerHTML = '';
-            toSelect.innerHTML = '';
+            const transferFrom = document.getElementById('transfer-from-tech');
+            const transferTo = document.getElementById('transfer-to-tech');
+
+            if (fromSelect) fromSelect.innerHTML = '';
+            if (toSelect) toSelect.innerHTML = '';
+            if (transferFrom) transferFrom.innerHTML = '';
+            if (transferTo) transferTo.innerHTML = '';
+
             tecnicos.forEach(t => {
-                fromSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
-                toSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+                if (fromSelect) fromSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+                if (toSelect) toSelect.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+                if (transferFrom) transferFrom.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+                if (transferTo) transferTo.innerHTML += `<option value="${t.name}">${t.name}</option>`;
             });
         }
 
@@ -1079,6 +1112,43 @@
                 await ejecutarCambioTecnicoReal(fecha, destino);
                 showToast(`🔄 Intercambio ejecutado con éxito para ${fecha}`);
                 logAudit(`Intercambio de guardia (${fecha}) asignado a ${destino}`);
+            });
+        }
+
+        async function ejecutarTraspasoMasivoGuardias() {
+            let origen = document.getElementById('transfer-from-tech').value;
+            let destino = document.getElementById('transfer-to-tech').value;
+
+            if (origen === destino) {
+                showToast("⚠️ El técnico de origen y destino deben ser diferentes");
+                return;
+            }
+
+            let fechasAfectadas = Object.keys(guardiasSemanas).filter(f => guardiasSemanas[f] === origen);
+
+            if (fechasAfectadas.length === 0) {
+                showToast(`⚠️ ${origen} no tiene ninguna guardia asignada`);
+                return;
+            }
+
+            solicitarPin(`Traspasar ${fechasAfectadas.length} guardia(s) de ${origen} a ${destino} permanentemente:`, async () => {
+                fechasAfectadas.forEach(f => {
+                    guardiasSemanas[f] = destino;
+                });
+
+                if (dbSupabase) {
+                    try {
+                        let updates = fechasAfectadas.map(f => ({ fecha_inicio: f, tecnico: destino }));
+                        await dbSupabase.from('guardias_semanas').upsert(updates, { onConflict: ['fecha_inicio'] });
+                    } catch(e) {
+                        console.error("Error sincronizando traspaso masivo:", e);
+                    }
+                }
+
+                playBeep('success');
+                render();
+                showToast(`🔄 Se han traspasado ${fechasAfectadas.length} guardias a ${destino}`);
+                logAudit(`Traspaso masivo de guardias: ${origen} ➔ ${destino} (${fechasAfectadas.length} semanas)`);
             });
         }
 
