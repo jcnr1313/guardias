@@ -324,7 +324,7 @@
                             <i class="fa-solid fa-users-slash text-rose-400"></i> Traspaso Masivo
                             <div class="info-tooltip-container" onclick="toggleTooltip(event, this)">
                                 <i class="fa-solid fa-circle-info"></i>
-                                <div class="info-tooltip">Reasigna TODAS las guardias pasadas y futuras de un técnico a otro de forma masiva.</div>
+                                <div class="info-tooltip">Reasigna TODAS las guardias del año actual de un técnico a otro y da de baja al origen.</div>
                             </div>
                         </span>
                     </h3>
@@ -338,7 +338,7 @@
                             <select id="transfer-to-tech" class="config-input"></select>
                         </div>
                         <button class="btn btn-danger" style="width: 100%; justify-content: center; margin-top: 4px;" onclick="ejecutarTraspasoMasivoGuardias()">
-                            <i class="fa-solid fa-arrows-rotate"></i> Traspasar Todas las Guardias
+                            <i class="fa-solid fa-arrows-rotate"></i> Traspasar Y Dar de Baja
                         </button>
                     </div>
                 </div>
@@ -1060,22 +1060,28 @@
         async function removeTechnician(name) {
             if (tecnicos.length <= 1) { showToast("⚠️ No se puede eliminar al último técnico"); return; }
             if (confirm(`¿Dar de baja a ${name}?`)) {
-                tecnicos = tecnicos.filter(t => t.name !== name);
-                let fallback = tecnicos[0].name;
-                for (let k in guardiasSemanas) { if (guardiasSemanas[k] === name) guardiasSemanas[k] = fallback; }
-                
-                if (dbSupabase) {
-                    try { await dbSupabase.from('tecnicos').delete().eq('name', name); } catch(e) {}
-                }
-
-                updateTechFilterOptions();
-                updateTradingSelects();
-                updateAlertRecipientOptions();
+                await darDeBajaTecnicoDefinitivo(name);
                 playBeep('click');
                 render();
                 showToast(`ℹ️ Técnico dado de baja`);
                 logAudit(`Técnico dado de baja: ${name}`);
             }
+        }
+
+        async function darDeBajaTecnicoDefinitivo(nombreTecnico) {
+            tecnicos = tecnicos.filter(t => t.name !== nombreTecnico);
+            
+            if (dbSupabase) {
+                try {
+                    await dbSupabase.from('tecnicos').delete().eq('name', nombreTecnico);
+                } catch(e) {
+                    console.error("Error al eliminar técnico de Supabase:", e);
+                }
+            }
+
+            updateTechFilterOptions();
+            updateTradingSelects();
+            updateAlertRecipientOptions();
         }
 
         function solicitarPinParaCambioTecnico(fechaStr, selectEl) {
@@ -1124,31 +1130,45 @@
                 return;
             }
 
-            let fechasAfectadas = Object.keys(guardiasSemanas).filter(f => guardiasSemanas[f] === origen);
+            let fechasAfectadas = Object.keys(guardiasSemanas).filter(f => {
+                return guardiasSemanas[f] === origen && f.startsWith(currentYear.toString());
+            });
 
             if (fechasAfectadas.length === 0) {
-                showToast(`⚠️ ${origen} no tiene ninguna guardia asignada`);
+                showToast(`⚠️ ${origen} no tiene ninguna guardia asignada en ${currentYear}`);
                 return;
             }
 
-            solicitarPin(`Traspasar ${fechasAfectadas.length} guardia(s) de ${origen} a ${destino} permanentemente:`, async () => {
+            solicitarPin(`Traspasar ${fechasAfectadas.length} guardia(s) de ${origen} a ${destino} para ${currentYear} y dar de baja:`, async () => {
                 fechasAfectadas.forEach(f => {
                     guardiasSemanas[f] = destino;
                 });
 
                 if (dbSupabase) {
                     try {
-                        let updates = fechasAfectadas.map(f => ({ fecha_inicio: f, tecnico: destino }));
-                        await dbSupabase.from('guardias_semanas').upsert(updates, { onConflict: ['fecha_inicio'] });
+                        for (let f of fechasAfectadas) {
+                            let { error } = await dbSupabase
+                                .from('guardias_semanas')
+                                .update({ tecnico: destino })
+                                .eq('fecha_inicio', f);
+                            
+                            if (error) {
+                                await dbSupabase
+                                    .from('guardias_semanas')
+                                    .upsert({ fecha_inicio: f, tecnico: destino }, { onConflict: ['fecha_inicio'] });
+                            }
+                        }
                     } catch(e) {
-                        console.error("Error sincronizando traspaso masivo:", e);
+                        console.error("Error sincronizando traspaso masivo con Supabase:", e);
                     }
                 }
 
+                await darDeBajaTecnicoDefinitivo(origen);
+
                 playBeep('success');
                 render();
-                showToast(`🔄 Se han traspasado ${fechasAfectadas.length} guardias a ${destino}`);
-                logAudit(`Traspaso masivo de guardias: ${origen} ➔ ${destino} (${fechasAfectadas.length} semanas)`);
+                showToast(`🔄 Traspasadas ${fechasAfectadas.length} guardias a ${destino} y ${origen} dado de baja`);
+                logAudit(`Traspaso masivo y baja definitiva: ${origen} ➔ ${destino} (${fechasAfectadas.length} semanas)`);
             });
         }
 
